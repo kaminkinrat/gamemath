@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Math Multiverse: Touch Master</title>
+    <title>Math Multiverse: Neon Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --neon-pink: #ff00ea;
             --neon-purple: #bc13fe;
             --neon-gold: #ffcc00;
-            --bg-dark: #050510;
+            --bg-dark: #02020a;
         }
 
         * {
@@ -30,106 +30,91 @@
         #game-container {
             position: relative;
             width: 100vw; height: 100dvh;
-            background: radial-gradient(circle at center, #101025 0%, #050510 100%);
+            background: #000;
             overflow: hidden;
         }
 
         canvas { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
 
-        /* Rainbow Fire Effect */
-        #combo-flash {
-            position: absolute; inset: 0;
+        /* Combo Notification */
+        #combo-notification {
+            position: absolute;
+            inset: 0;
             pointer-events: none;
             z-index: 1800;
             opacity: 0;
-            transition: opacity 0.3s;
-            overflow: hidden;
+            transition: opacity 0.2s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
-        #combo-flash.flashing {
+
+        #combo-notification.active {
             opacity: 1;
+            animation: screen-shake 0.1s infinite;
         }
 
-        /* Flame particles container */
-        .flame-container {
+        @keyframes screen-shake {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(1px, -1px); }
+        }
+
+        .rainbow-rect {
             position: absolute;
-            inset: -20px;
-            filter: blur(8px) contrast(15);
-            background: transparent;
+            inset: 0px;
+            border: 10px solid transparent;
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: rainbow-rotate 1.5s linear infinite;
         }
 
-        .flame {
-            position: absolute;
-            bottom: 0;
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            animation: burn 1s infinite;
+        @keyframes rainbow-rotate {
+            0% { filter: hue-rotate(0deg) brightness(1.1); }
+            100% { filter: hue-rotate(360deg) brightness(1.3); }
         }
 
-        @keyframes burn {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-150px) scale(0); opacity: 0; }
-        }
-
-        /* Border Glow Rainbow */
-        .rainbow-aura {
-            position: absolute;
-            inset: 0;
-            box-shadow: inset 0 0 50px rgba(255,255,255,0.5);
-            animation: rainbow-anim 1s infinite;
-        }
-
-        @keyframes rainbow-anim {
-            0% { filter: hue-rotate(0deg); box-shadow: inset 0 0 60px red; }
-            25% { box-shadow: inset 0 0 60px yellow; }
-            50% { box-shadow: inset 0 0 60px green; }
-            75% { box-shadow: inset 0 0 60px blue; }
-            100% { filter: hue-rotate(360deg); box-shadow: inset 0 0 60px red; }
-        }
-
-        #orientation-overlay {
-            position: fixed; inset: 0; background: #000; z-index: 10000;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
-        }
-        @media screen and (orientation: portrait) {
-            #orientation-overlay { display: flex; }
-        }
-
+        /* UI Styling */
         .overlay {
             position: absolute; inset: 0;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.85); z-index: 2000; backdrop-filter: blur(15px);
+            background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(8px);
             padding: 20px;
         }
 
         .hidden { display: none !important; }
 
         .panel {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--neon-blue);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 242, 255, 0.4);
             border-radius: 30px;
             padding: 25px;
             text-align: center;
             width: 95%; max-width: 850px;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
             max-height: 90dvh;
             overflow-y: auto;
-            touch-action: pan-y;
+            z-index: 2100;
         }
 
         .title { 
-            font-size: 2.2rem; 
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            font-size: 2.8rem; 
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f2ff, #ff00ea);
+            background-size: 400%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: text-rainbow 8s linear infinite;
             margin-bottom: 20px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        @keyframes text-rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
         .mode-grid {
@@ -140,63 +125,57 @@
         }
 
         .mode-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
             color: white;
-            padding: 15px 10px;
+            padding: 12px;
             border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(0, 242, 255, 0.2);
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            touch-action: manipulation;
+            transition: all 0.2s ease;
         }
-        .mode-btn:active { transform: scale(0.95); background: var(--neon-blue); color: black; }
-        .mode-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--neon-blue); }
-        .mode-btn .emoji { font-size: 1.8rem; margin-bottom: 4px; pointer-events: none; }
-        .mode-btn .m-name { font-weight: 700; font-size: 0.9rem; pointer-events: none; }
+        .mode-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--neon-blue); transform: translateY(-3px); }
 
         #hud {
             position: absolute; top: 0; left: 0; width: 100%;
-            padding: 10px 20px; display: flex; justify-content: space-between;
+            padding: 15px 25px; display: flex; justify-content: space-between;
             align-items: center; pointer-events: none; z-index: 1000;
         }
 
-        .hud-group { display: flex; gap: 8px; pointer-events: auto; }
         .hud-item { 
             background: rgba(0,0,0,0.7); 
-            padding: 5px 15px; 
+            padding: 6px 15px; 
             border-radius: 20px; 
             border: 1.5px solid var(--neon-blue); 
-            font-weight: 700; 
-            color: white; 
-            font-size: 0.8rem;
+            font-weight: 700; color: white;
+            font-size: 0.85rem;
         }
 
         #choice-container {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-            width: 98%; max-width: 650px; z-index: 1500;
-            touch-action: none;
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            width: 95%; max-width: 650px; z-index: 1500;
         }
 
         .choice-btn {
-            background: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.5);
             border: 2px solid var(--neon-blue);
             color: white;
-            padding: 18px 0;
+            padding: 12px 0;
             border-radius: 15px;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            backdrop-filter: blur(5px);
-            text-align: center;
-            box-shadow: 0 4px 0 rgba(0, 242, 255, 0.3);
-            transition: transform 0.05s;
-            touch-action: manipulation;
+            text-shadow: 0 0 8px var(--neon-blue);
+            box-shadow: 0 4px 0 rgba(0, 242, 255, 0.4);
+            transition: all 0.1s;
         }
-        .choice-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 242, 255, 0.3); background: var(--neon-pink); }
+        .choice-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--neon-blue); background: var(--neon-pink); }
+
+        #orientation-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 10000;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px;
+        }
+        @media screen and (orientation: portrait) { #orientation-overlay { display: flex; } }
     </style>
 </head>
 <body>
@@ -204,29 +183,24 @@
 <div id="orientation-overlay">
     <div style="font-size: 4rem;">📱🔄</div>
     <h2 style="margin-top: 20px;">กรุณาหมุนหน้าจอเป็นแนวนอน</h2>
-    <p style="opacity: 0.7; margin-top: 10px;">เกมนี้ต้องการพื้นที่กว้างเพื่อการเล่นที่แม่นยำ</p>
 </div>
 
 <div id="game-container">
-    <div id="combo-flash">
-        <div class="rainbow-aura"></div>
-        <div id="flame-wall-bottom" class="flame-container"></div>
-        <div id="flame-wall-top" class="flame-container" style="top:0; bottom:auto; transform: scaleY(-1);"></div>
-        <div id="flame-wall-left" class="flame-container" style="left:0; right:auto; width:100px; height:100%; transform: rotate(90deg) scaleY(-1);"></div>
-        <div id="flame-wall-right" class="flame-container" style="right:0; left:auto; width:100px; height:100%; transform: rotate(-90deg) scaleY(-1);"></div>
+    <div id="combo-notification">
+        <div class="rainbow-rect"></div>
+        <div style="font-size: 4rem; font-weight: 900; color: white; text-shadow: 0 0 20px black;">COMBO!!</div>
     </div>
+
     <canvas id="mathBgCanvas"></canvas>
     <canvas id="mainCanvas"></canvas>
 
     <div id="hud" class="hidden">
-        <div class="hud-group">
+        <div style="display: flex; gap: 8px;">
             <div class="hud-item">HP: <span id="hp-val">❤️❤️❤️❤️</span></div>
             <div class="hud-item">SCORE: <span id="score-val">0</span></div>
-            <div class="hud-item" id="combo-hud" style="color: var(--neon-gold); display: none;">COMBO: <span id="combo-val">0</span></div>
+            <div class="hud-item" id="combo-hud" style="color: var(--neon-gold); display: none; border-color: var(--neon-gold);">COMBO: <span id="combo-val">0</span></div>
         </div>
-        <div class="hud-group">
-            <button class="hud-item" style="background: var(--neon-pink); cursor:pointer;" onclick="location.reload()">HOME</button>
-        </div>
+        <button class="hud-item" style="background: var(--neon-pink); cursor:pointer; pointer-events: auto; border-color: white;" onclick="location.reload()">HOME</button>
     </div>
 
     <div id="choice-container" class="hidden">
@@ -236,20 +210,19 @@
         <button class="choice-btn" onpointerdown="app.submitChoice(3)">-</button>
     </div>
 
-    <!-- Menus -->
     <div id="menu-main" class="overlay">
         <div class="panel">
             <h1 class="title">MATH MULTIVERSE</h1>
             <div class="mode-grid" id="mode-grid-container"></div>
-            <p style="font-size: 0.9rem; opacity: 0.7; color: var(--neon-blue);">เลื่อนเพื่อดูโหมดเพิ่มเติม | 4 หัวใจ | ท้าทายกว่าเดิม!</p>
+            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">ยินดีต้อนรับสู่จักรวาลตัวเลข</p>
         </div>
     </div>
 
     <div id="menu-result" class="overlay hidden">
         <div class="panel">
             <h1 class="title">GAME OVER</h1>
-            <div id="result-stats" style="margin: 20px 0; font-size: 1.5rem; font-weight: 600;"></div>
-            <button class="choice-btn" style="width: 100%;" onclick="location.reload()">ลองใหม่อีกครั้ง</button>
+            <div id="result-stats" style="margin: 20px 0; font-size: 1.6rem; font-weight: 700; color: white;"></div>
+            <button class="choice-btn" style="width: 100%;" onclick="location.reload()">เล่นใหม่</button>
         </div>
     </div>
 </div>
@@ -259,58 +232,33 @@ const MODES = [
     { id: 'baby', name: 'เบบี๋', emoji: '🍼', range: 5, ops: ['+'], speedMul: 0.7 },
     { id: 'v_easy', name: 'ง่ายมาก', emoji: '🌸', range: 10, ops: ['+', '-'], speedMul: 0.8 },
     { id: 'kid', name: 'เด็กน้อย', emoji: '🐰', range: 15, ops: ['+', '-'], speedMul: 1.0 },
-    { id: 'hyper', name: 'ความเร็วแสง', emoji: '⚡', range: 20, ops: ['+', '-'], speedMul: 1.2, ramp: true },
+    { id: 'hyper', name: 'ความเร็วแสง', emoji: '⚡', range: 20, ops: ['+', '-'], speedMul: 1.25, ramp: true },
     { id: 'multi', name: 'เซียนคูณ', emoji: '⚔️', range: 12, ops: ['*'], speedMul: 0.9 },
-    { id: 'flash_div', name: 'หารสายฟ้า', emoji: '⚡', range: 10, ops: ['/'], speedMul: 1.2 },
-    { id: 'sonic', name: 'โซนิค', emoji: '🚀', range: 25, ops: ['+', '-'], speedMul: 2.2 },
-    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 1.0, hideDelay: 200 },
-    { id: 'titan', name: 'บอสใหญ่', emoji: '👺', range: 60, ops: ['+', '-', '*','/'], speedMul: 1.6 },
-    { id: 'zen', name: 'ชิลๆ', emoji: '🎋', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
+    { id: 'div', name: 'หารสายฟ้า', emoji: '⚡', range: 10, ops: ['/'], speedMul: 1.1 },
+    { id: 'sonic', name: 'โซนิค', emoji: '🚀', range: 25, ops: ['+', '-'], speedMul: 2.1 },
+    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 120 },
+    { id: 'titan', name: 'บอสใหญ่', emoji: '👺', range: 60, ops: ['+', '-', '*', '/'], speedMul: 1.6 },
+    { id: 'chill', name: 'ชิลๆ', emoji: '🎋', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
 ];
 
 class SoundManager {
-    constructor() { 
-        this.ctx = null;
-        this.bgmStarted = false;
-    }
-    init() { 
-        if (!this.ctx) {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-            this.startBGM();
-        }
-    }
-    startBGM() {
-        if (this.bgmStarted) return;
-        this.bgmStarted = true;
-        const createPad = (freq, vol) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0, this.ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 2);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start();
-        };
-        createPad(196.00, 0.05);
-        createPad(261.63, 0.04);
-    }
-    playSuccess() { this.beep(880, 'sine', 0.2, 0.2); }
-    playFail() { this.beep(120, 'sawtooth', 0.4, 0.3); }
-    playGround() { this.beep(60, 'square', 0.3, 0.25); }
-    playCombo() { this.beep(1320, 'sine', 0.5, 0.4); }
-    
+    constructor() { this.ctx = null; }
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+    playSuccess() { this.beep(880, 'sine', 0.2, 0.08); }
+    playFail() { this.beep(110, 'sawtooth', 0.4, 0.12); }
+    playCombo() { this.beep(1320, 'sine', 0.6, 0.15); }
     beep(freq, type, duration, vol) {
         if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const g = this.ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        g.gain.setValueAtTime(vol, this.ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-        osc.connect(g); g.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + duration);
+        try {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            g.gain.setValueAtTime(vol, this.ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+            osc.connect(g); g.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + duration);
+        } catch(e){}
     }
 }
 const sfx = new SoundManager();
@@ -321,57 +269,44 @@ const app = {
     state: 'menu',
     score: 0, hp: 4, combo: 0,
     activeMode: null,
-    problems: [], particles: [], mathSymbols: [],
+    problems: [], particles: [], stars: [],
     choices: [], currentTarget: null,
     lastSpawn: 0,
     spawnDelay: 2000, 
     speedFactor: 1.0,
+    hueOffset: 0,
 
     init() {
         this.canvas = document.getElementById('mainCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.bgCanvas = document.getElementById('mathBgCanvas');
         this.bgCtx = this.bgCanvas.getContext('2d');
-        
         this.renderMenu();
         this.resize();
-        this.initMathBg();
-        this.createFlameElements();
+        this.initSpaceBg();
         window.addEventListener('resize', () => this.resize());
         this.loop();
-    },
-
-    createFlameElements() {
-        const containers = ['flame-wall-bottom', 'flame-wall-top'];
-        containers.forEach(id => {
-            const container = document.getElementById(id);
-            for(let i=0; i<30; i++) {
-                const f = document.createElement('div');
-                f.className = 'flame';
-                f.style.left = `${(i/30)*100}%`;
-                f.style.animationDelay = `${Math.random()}s`;
-                f.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 70%)`;
-                container.appendChild(f);
-            }
-        });
     },
 
     resize() {
         this.canvas.width = this.bgCanvas.width = window.innerWidth;
         this.canvas.height = this.bgCanvas.height = window.innerHeight;
+        this.initSpaceBg();
     },
 
-    initMathBg() {
-        const chars = ['π', 'Σ', '∞', '√', '∫', '∆', 'x', 'y', '+', '=', '÷'];
-        this.mathSymbols = [];
-        for(let i=0; i<30; i++) {
-            this.mathSymbols.push({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+    initSpaceBg() {
+        const chars = ['π', 'Σ', '∞', '√', '∫', 'x', 'y', 'z', 'f', 'λ', 'θ', 'Δ', '1', '0', '+', '-', '='];
+        this.stars = [];
+        // หน้าเมนูจะมีสัญลักษณ์มากกว่าหน้าเล่นเพื่อความว้าว
+        const count = this.state === 'menu' ? 60 : 25; 
+        for(let i=0; i<count; i++) {
+            this.stars.push({
+                x: Math.random() * this.canvas.width - this.canvas.width/2,
+                y: Math.random() * this.canvas.height - this.canvas.height/2,
+                z: Math.random() * this.canvas.width,
                 char: chars[Math.floor(Math.random() * chars.length)],
-                size: 15 + Math.random() * 30,
-                speed: 0.15 + Math.random() * 0.4,
-                opacity: 0.05 + Math.random() * 0.12
+                vx: (Math.random() - 0.5) * 0.5, // ความเร็วแนวราบสำหรับเมนู
+                vy: (Math.random() - 0.5) * 0.5
             });
         }
     },
@@ -381,7 +316,7 @@ const app = {
         MODES.forEach(m => {
             const btn = document.createElement('button');
             btn.className = 'mode-btn';
-            btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="m-name">${m.name}</span>`;
+            btn.innerHTML = `<div style="font-size:1.6rem; margin-bottom:5px;">${m.emoji}</div><div style="font-weight:700; font-size:0.85rem;">${m.name}</div>`;
             btn.onclick = () => { sfx.init(); this.start(m); };
             container.appendChild(btn);
         });
@@ -390,14 +325,10 @@ const app = {
     start(mode) {
         this.activeMode = mode;
         this.state = 'play';
-        this.score = 0;
-        this.hp = mode.hp || 4;
-        this.combo = 0;
-        this.speedFactor = 1.0;
-        this.problems = [];
-        this.particles = [];
+        this.score = 0; this.hp = 4; this.combo = 0; this.speedFactor = 1.0;
+        this.problems = []; this.particles = [];
         this.lastSpawn = Date.now();
-        this.spawnDelay = 800; 
+        this.initSpaceBg(); // รีเซ็ตพื้นหลังให้เข้าโหมดเล่น (สัญลักษณ์น้อยลง)
         document.getElementById('menu-main').classList.add('hidden');
         document.getElementById('hud').classList.remove('hidden');
         document.getElementById('choice-container').classList.remove('hidden');
@@ -409,37 +340,28 @@ const app = {
         const m = this.activeMode;
         let a, b, op, ans;
         op = m.ops[Math.floor(Math.random() * m.ops.length)];
-        const range = m.range + Math.floor(this.score / 50);
+        const range = m.range + Math.floor(this.score / 100);
 
         if (op === '+') { a = rand(1, range); b = rand(1, range); ans = a + b; }
         else if (op === '-') { a = rand(5, range + 5); b = rand(1, a); ans = a - b; }
-        else if (op === '*') { a = rand(2, range > 20 ? 12 : 9); b = rand(2, 9); ans = a * b; }
+        else if (op === '*') { a = rand(2, 12); b = rand(2, 10); ans = a * b; }
         else if (op === '/') { b = rand(2, 10); ans = rand(1, 10); a = ans * b; op = '÷'; }
 
-        let safeX = 100 + Math.random() * (this.canvas.width - 200);
-        const minGap = 160; 
-        
-        for(let attempt = 0; attempt < 20; attempt++) {
-            let conflict = this.problems.some(p => Math.abs(p.x - safeX) < minGap && p.y < 120);
-            if (!conflict) break;
-            safeX = 100 + Math.random() * (this.canvas.width - 200);
-        }
-
-        const baseSpeed = (0.7 + (this.score / 600)) * (m.speedMul || 1);
         const prob = {
             id: Date.now() + Math.random(),
-            text: `${a} ${op} ${b}`,
+            text: `${a} ${op === '*' ? '×' : op} ${b}`,
             ans: ans,
-            x: safeX,
-            y: -100,
-            speed: baseSpeed * this.speedFactor, 
+            x: 150 + Math.random() * (this.canvas.width - 300),
+            y: -50,
+            speed: (0.7 + (this.score / 900)) * m.speedMul * this.speedFactor,
             hide: m.hideProb,
-            hideTimer: m.hideDelay || 0 
+            hideTimer: m.hideDelay || 0,
+            seed: Math.random() * 360 
         };
 
         this.problems.push(prob);
         if (this.problems.length === 1) this.updateChoices();
-        this.spawnDelay = Math.max(800, (2000 + Math.random() * 1500) / this.speedFactor);
+        this.spawnDelay = Math.max(900, 2400 / this.speedFactor);
     },
 
     updateChoices() {
@@ -448,7 +370,7 @@ const app = {
         const correct = this.currentTarget.ans;
         let c = [correct];
         while (c.length < 4) {
-            let fake = correct + rand(-10, 10);
+            let fake = correct + rand(-12, 12);
             if (fake >= 0 && !c.includes(fake)) c.push(fake);
         }
         this.choices = c.sort(() => Math.random() - 0.5);
@@ -459,22 +381,17 @@ const app = {
     submitChoice(idx) {
         if (this.state !== 'play' || !this.currentTarget) return;
         if (this.choices[idx] === this.currentTarget.ans) {
-            this.score += 10 + (this.combo * 2);
+            this.score += 10 + (this.combo * 5);
             this.combo++;
+            if (this.activeMode.ramp) this.speedFactor += 0.025;
             
-            if (this.activeMode.ramp) {
-                this.speedFactor += 0.08;
-            }
+            if (this.combo > 0 && this.combo % 5 === 0) this.triggerComboAlert();
 
-            if (this.combo > 0 && this.combo % 5 === 0) {
-                this.triggerComboEffect();
-            }
-
-            this.explode(this.currentTarget.x, this.currentTarget.y, varColor('--neon-blue'));
+            this.explode(this.currentTarget.x, this.currentTarget.y, `hsl(${this.hueOffset}, 100%, 70%)`);
             this.problems.shift();
             this.updateChoices();
             sfx.playSuccess();
-            this.lastSpawn = Date.now() - (this.spawnDelay - 800);
+            this.lastSpawn = Date.now() - 600;
         } else {
             this.combo = 0;
             this.triggerPenalty();
@@ -483,28 +400,23 @@ const app = {
         this.updateHUD();
     },
 
-    triggerComboEffect() {
+    triggerComboAlert() {
         sfx.playCombo();
-        // สั่นแรงมากและยาวขึ้นตามระดับความเทพ
-        if (navigator.vibrate) {
-            navigator.vibrate([100, 50, 100, 50, 100, 50, 800]); 
-        }
-        
-        const flash = document.getElementById('combo-flash');
-        flash.classList.add('flashing');
-        setTimeout(() => flash.classList.remove('flashing'), 2800);
+        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+        const notification = document.getElementById('combo-notification');
+        notification.classList.add('active');
+        setTimeout(() => notification.classList.remove('active'), 1200);
     },
 
     triggerPenalty() {
         if (!this.activeMode.invul) this.hp--;
-        if (navigator.vibrate) navigator.vibrate(100);
+        if (navigator.vibrate) navigator.vibrate([200]);
         if (this.hp <= 0) this.gameOver();
     },
 
     updateHUD() {
         document.getElementById('score-val').innerText = this.score;
         document.getElementById('hp-val').innerText = this.activeMode.invul ? '∞' : '❤️'.repeat(this.hp);
-        
         const comboHud = document.getElementById('combo-hud');
         if (this.combo >= 2) {
             comboHud.style.display = 'block';
@@ -516,33 +428,50 @@ const app = {
 
     gameOver() {
         this.state = 'over';
-        if (navigator.vibrate) navigator.vibrate([150, 50, 150]);
+        if (navigator.vibrate) navigator.vibrate([500]);
         document.getElementById('menu-result').classList.remove('hidden');
-        document.getElementById('result-stats').innerText = `คะแนน: ${this.score} | สูงสุด Combo: ${this.combo}`;
+        document.getElementById('result-stats').innerText = `🏆 คะแนน: ${this.score} | 🔥 คอมโบ: ${this.combo}`;
     },
 
     explode(x, y, color) {
-        for(let i=0; i<15; i++) {
+        for(let i=0; i<12; i++) {
             this.particles.push({
-                x, y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
-                life: 1, size: Math.random()*4+2, color: color || 'white'
+                x, y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                life: 1, size: Math.random()*3+1.5, color: color
             });
         }
     },
 
     update() {
-        this.mathSymbols.forEach(s => {
-            s.y -= s.speed;
-            if (s.y < -50) {
-                s.y = this.canvas.height + 50;
-                s.x = Math.random() * this.canvas.width;
-            }
-        });
+        this.hueOffset = (this.hueOffset + 1) % 360;
+
+        // พื้นหลัง: หน้าเมนูจะลอยเอื่อยๆ หน้าเล่นจะพุ่ง
+        if (this.state === 'menu') {
+            this.stars.forEach(s => {
+                s.x += s.vx; s.y += s.vy;
+                if (s.x > this.canvas.width/2) s.x = -this.canvas.width/2;
+                if (s.x < -this.canvas.width/2) s.x = this.canvas.width/2;
+                if (s.y > this.canvas.height/2) s.y = -this.canvas.height/2;
+                if (s.y < -this.canvas.height/2) s.y = this.canvas.height/2;
+            });
+        } else {
+            const warpSpeed = 2 + (this.score/500);
+            this.stars.forEach(s => {
+                s.z -= warpSpeed;
+                if (s.z <= 0) {
+                    s.z = this.canvas.width;
+                    s.x = Math.random() * this.canvas.width - this.canvas.width/2;
+                    s.y = Math.random() * this.canvas.height - this.canvas.height/2;
+                }
+            });
+        }
 
         if (this.state !== 'play') return;
         
         let now = Date.now();
-        if (now - this.lastSpawn > this.spawnDelay && this.problems.length < 3) {
+        // เอาเงื่อนไข problems.length < 3 ออกเพื่อให้ไหลลงมาเรื่อยๆ ได้มากขึ้นตามความเร็ว
+        const maxActive = this.speedFactor > 1.5 ? 5 : 3;
+        if (now - this.lastSpawn > this.spawnDelay && this.problems.length < maxActive) {
             this.spawnProblem();
             this.lastSpawn = now;
         }
@@ -550,61 +479,100 @@ const app = {
         this.problems.forEach((p, i) => {
             p.y += p.speed;
             if (p.hideTimer > 0) p.hideTimer--;
-            
-            if (p.y > this.canvas.height - 110) {
-                this.explode(p.x, p.y, varColor('--neon-pink'));
+            if (p.y > this.canvas.height - 90) {
                 this.problems.splice(i, 1);
                 this.combo = 0;
-                sfx.playGround();
                 this.triggerPenalty();
                 this.updateChoices();
                 this.updateHUD();
                 this.lastSpawn = Date.now();
-                this.spawnDelay = 1200;
             }
         });
 
         this.particles.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.life -= 0.025;
+            p.x += p.vx; p.y += p.vy; p.life -= 0.04;
             if(p.life <= 0) this.particles.splice(i, 1);
         });
     },
 
     draw() {
-        this.bgCtx.fillStyle = '#050510';
+        this.bgCtx.fillStyle = '#010106';
         this.bgCtx.fillRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
         
-        this.mathSymbols.forEach(s => {
-            this.bgCtx.globalAlpha = s.opacity;
-            this.bgCtx.fillStyle = 'white';
-            this.bgCtx.font = `${s.size}px Mitr`;
-            this.bgCtx.fillText(s.char, s.x, s.y);
-        });
-        this.bgCtx.globalAlpha = 1;
+        const cx = this.bgCanvas.width / 2;
+        const cy = this.bgCanvas.height / 2;
+        
+        if (this.state === 'menu') {
+            // หน้าเมนู: ลอยแบบชิลล์ๆ
+            this.stars.forEach(s => {
+                const sx = s.x + cx;
+                const sy = s.y + cy;
+                this.bgCtx.globalAlpha = 0.4;
+                this.bgCtx.fillStyle = `hsl(${(this.hueOffset + s.z/2)%360}, 60%, 70%)`;
+                this.bgCtx.font = `20px Mitr`;
+                this.bgCtx.fillText(s.char, sx, sy);
+            });
+        } else {
+            // หน้าเล่น: พุ่งแบบประหยัดเอฟเฟกต์
+            this.stars.forEach(s => {
+                const sx = (s.x / s.z) * cx + cx;
+                const sy = (s.y / s.z) * cy + cy;
+                const size = (1 - s.z / this.bgCanvas.width) * 10;
+                const alpha = (1 - s.z / this.bgCanvas.width) * 0.4;
+
+                this.bgCtx.globalAlpha = alpha;
+                this.bgCtx.fillStyle = `hsl(${(this.hueOffset + s.z)%360}, 40%, 60%)`;
+                this.bgCtx.font = `bold ${size + 6}px Mitr`;
+                this.bgCtx.fillText(s.char, sx, sy);
+            });
+        }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         this.problems.forEach(p => {
             const isTarget = this.currentTarget && p.id === this.currentTarget.id;
-            this.ctx.shadowBlur = isTarget ? 20 : 0;
-            this.ctx.shadowColor = varColor('--neon-blue');
             
-            this.ctx.fillStyle = isTarget ? varColor('--neon-blue') : 'rgba(255,255,255,0.7)';
-            this.ctx.font = `bold ${isTarget ? '46' : '32'}px 'Mitr'`;
+            this.ctx.font = `bold ${isTarget ? '38' : '28'}px 'Mitr'`;
             this.ctx.textAlign = 'center';
             let txt = (p.hide && p.hideTimer <= 0) ? '???' : p.text;
+            
+            const gradient = this.ctx.createLinearGradient(p.x - 35, p.y, p.x + 35, p.y);
+            gradient.addColorStop(0, `hsl(${this.hueOffset + p.seed}, 100%, 70%)`);
+            gradient.addColorStop(1, `hsl(${this.hueOffset + p.seed + 60}, 100%, 70%)`);
+            
+            this.ctx.fillStyle = gradient;
+            this.ctx.shadowBlur = isTarget ? 12 : 0;
+            this.ctx.shadowColor = `hsl(${this.hueOffset + p.seed}, 100%, 50%)`;
             this.ctx.fillText(txt, p.x, p.y);
+            this.ctx.shadowBlur = 0;
             
             if (isTarget) {
+                const time = Date.now() * 0.003;
+                this.ctx.save();
+                this.ctx.translate(p.x, p.y - 10);
+                this.ctx.rotate(time);
+                
+                // วงกลมนีออนขนาดพอดีโจทย์
+                this.ctx.shadowBlur = 12;
+                this.ctx.shadowColor = varColor('--neon-pink');
                 this.ctx.strokeStyle = varColor('--neon-pink');
-                this.ctx.lineWidth = 4;
-                this.ctx.setLineDash([5, 5]);
+                this.ctx.lineWidth = 3;
+                this.ctx.setLineDash([10, 6]);
+                
                 this.ctx.beginPath();
-                this.ctx.arc(p.x, p.y - 14, 60, 0, Math.PI*2);
+                this.ctx.arc(0, 0, 52, 0, Math.PI * 2);
                 this.ctx.stroke();
-                this.ctx.setLineDash([]);
+                
+                this.ctx.rotate(-time * 1.5);
+                this.ctx.strokeStyle = varColor('--neon-blue');
+                this.ctx.lineWidth = 1.5;
+                this.ctx.setLineDash([3, 3]);
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, 45, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                this.ctx.restore();
             }
-            this.ctx.shadowBlur = 0;
         });
 
         this.particles.forEach(p => {
@@ -630,4 +598,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
