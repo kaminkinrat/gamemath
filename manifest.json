@@ -1,23 +1,23 @@
 {
   "name": "Math Multiverse",
   "short_name": "MathGame",
-  "start_url": "/gamemath/index.html",
-  "scope": "/gamemath/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "landscape",
   "background_color": "#000000",
   "theme_color": "#000000",
   "description": "เกมคณิตคิดเร็ว",
   "icons": [
     {
-      "src": "/gamemath/logo_192.svg",
+      "src": "logo_192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "/gamemath/logo_512.svg",
+      "src": "logo_512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }
