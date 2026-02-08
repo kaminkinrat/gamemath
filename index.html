@@ -22,6 +22,56 @@
             height: 100%;
         }
 
+        /* Portrait mode warning - show only on mobile */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #gameContainer, #ui {
+                display: none !important;
+            }
+            
+            body::before {
+                content: '';
+                display: block;
+            }
+            
+            #rotateWarning {
+                display: flex !important;
+            }
+        }
+
+        #rotateWarning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #rotateWarning .rotate-icon {
+            font-size: 80px;
+            animation: rotate 2s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        #rotateWarning .rotate-text {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
         #gameContainer {
             width: 100vw;
             height: 100vh;
@@ -210,84 +260,134 @@
             display: block;
         }
 
-        #answerDisplay {
-            position: absolute;
-            bottom: 150px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 25px;
-            font-size: clamp(24px, 6vw, 42px);
-            font-family: 'Comic Sans MS', cursive;
-            background: rgba(255, 255, 255, 0.98);
-            border: 4px solid #667eea;
-            border-radius: 25px;
-            color: #667eea;
-            text-align: center;
-            width: 85%;
-            max-width: 280px;
-            display: none;
-            pointer-events: none;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-            font-weight: bold;
-            min-height: 60px;
-            line-height: 1.2;
+        /* Desktop: use traditional input */
+        @media screen and (min-width: 769px) {
+            #answerInput {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 30px;
+                font-size: clamp(20px, 5vw, 36px);
+                font-family: 'Comic Sans MS', cursive;
+                background: rgba(255, 255, 255, 0.98);
+                border: 4px solid #667eea;
+                border-radius: 30px;
+                color: #667eea;
+                text-align: center;
+                width: 80%;
+                max-width: 300px;
+                display: none;
+                pointer-events: all;
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+                font-weight: bold;
+            }
+
+            #answerInput.active {
+                display: block;
+            }
+
+            #answerInput:focus {
+                outline: none;
+                border-color: #ff6b6b;
+                box-shadow: 0 4px 30px rgba(255, 107, 107, 0.5);
+            }
+
+            #answerDisplay {
+                display: none !important;
+            }
+
+            #numberPad {
+                display: none !important;
+            }
         }
 
-        #answerDisplay.active {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        /* Mobile: use custom number pad on the side */
+        @media screen and (max-width: 768px) {
+            #answerInput {
+                display: none !important;
+            }
 
-        #numberPad {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            width: 90%;
-            max-width: 320px;
-            pointer-events: all;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
-        }
+            #answerDisplay {
+                position: absolute;
+                top: 50%;
+                left: 15px;
+                transform: translateY(-50%);
+                padding: 15px 20px;
+                font-size: clamp(28px, 7vw, 48px);
+                font-family: 'Comic Sans MS', cursive;
+                background: rgba(255, 255, 255, 0.98);
+                border: 4px solid #667eea;
+                border-radius: 20px;
+                color: #667eea;
+                text-align: center;
+                width: 120px;
+                display: none;
+                pointer-events: none;
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+                font-weight: bold;
+                min-height: 70px;
+                line-height: 1.2;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
 
-        #numberPad.active {
-            display: grid;
-        }
+            #answerDisplay.active {
+                display: flex;
+            }
 
-        .num-btn {
-            padding: 15px;
-            font-size: clamp(20px, 5vw, 28px);
-            font-family: 'Comic Sans MS', cursive;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 15px;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
-            transition: all 0.2s;
-            touch-action: manipulation;
-            user-select: none;
-        }
+            #numberPad {
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                transform: translateY(-50%);
+                display: none;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+                width: 180px;
+                pointer-events: all;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+            }
 
-        .num-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 1px 5px rgba(102, 126, 234, 0.3);
-        }
+            #numberPad.active {
+                display: grid;
+            }
 
-        .num-btn.special {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-        }
+            .num-btn {
+                padding: 12px;
+                font-size: 20px;
+                font-family: 'Comic Sans MS', cursive;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                border-radius: 12px;
+                color: #fff;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+                transition: all 0.2s;
+                touch-action: manipulation;
+                user-select: none;
+            }
 
-        .num-btn.submit {
-            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-            grid-column: span 3;
+            .num-btn:active {
+                transform: scale(0.95);
+                box-shadow: 0 1px 4px rgba(102, 126, 234, 0.3);
+            }
+
+            .num-btn.special {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+                font-size: 18px;
+            }
+
+            .num-btn.submit {
+                background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+                grid-column: span 3;
+                font-size: 18px;
+            }
         }
 
         .feedback {
@@ -368,9 +468,42 @@
             font-weight: bold;
             font-size: clamp(16px, 3.5vw, 22px);
         }
+
+        #audioToggle {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            color: #667eea;
+            font-size: 20px;
+            cursor: pointer;
+            pointer-events: all;
+            z-index: 101;
+            display: none;
+            font-family: 'Comic Sans MS', cursive;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s;
+        }
+
+        #audioToggle.active {
+            display: block;
+        }
+
+        #audioToggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
     </style>
 </head>
 <body>
+    <div id="rotateWarning">
+        <div class="rotate-icon">📱➡️</div>
+        <div class="rotate-text">กรุณาหมุนหน้าจอเป็นแนวนอน<br>เพื่อเล่นเกม</div>
+    </div>
+
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         
@@ -483,8 +616,13 @@
             <div id="lives">❤️❤️❤️❤️❤️</div>
 
             <button id="pauseBtn" onclick="game.pause()">⏸️ พัก</button>
-            <div id="answerDisplay">0</div>
+            <button id="audioToggle" onclick="game.toggleAudio()">🔊</button>
             
+            <!-- Desktop input -->
+            <input type="number" id="answerInput" placeholder="?" inputmode="numeric">
+            
+            <!-- Mobile display and numpad -->
+            <div id="answerDisplay">0</div>
             <div id="numberPad">
                 <button class="num-btn" onclick="game.inputNumber(1)">1</button>
                 <button class="num-btn" onclick="game.inputNumber(2)">2</button>
@@ -505,6 +643,11 @@
             <div class="stars" id="stars">✨⭐✨</div>
         </div>
     </div>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" type="audio/mpeg">
+    </audio>
 
     <script>
         class Vector2 {
@@ -723,7 +866,6 @@
                 const y = this.pos.y - this.height/2;
                 const r = 15;
                 
-                // Gentle wobble
                 const wobbleX = Math.sin(this.wobble) * 2;
                 
                 ctx.save();
@@ -738,7 +880,6 @@
                 ctx.lineWidth = 5;
                 ctx.stroke();
                 
-                // Cute sparkle
                 ctx.fillStyle = this.color;
                 ctx.font = '16px Arial';
                 ctx.fillText('✨', x + this.width - 20, y + 20);
@@ -791,11 +932,9 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                // Shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
                 ctx.fillText(this.expression, 2, 2);
                 
-                // Character
                 ctx.fillStyle = '#000';
                 ctx.fillText(this.expression, 0, 0);
                 
@@ -808,7 +947,8 @@
                 this.context = null;
                 this.masterGain = null;
                 this.initialized = false;
-                this.musicInterval = null;
+                this.enabled = true;
+                this.bgMusic = null;
             }
 
             init() {
@@ -816,22 +956,40 @@
                 try {
                     this.context = new (window.AudioContext || window.webkitAudioContext)();
                     this.masterGain = this.context.createGain();
-                    this.masterGain.gain.value = 0.15;
+                    this.masterGain.gain.value = 0.3;
                     this.masterGain.connect(this.context.destination);
                     this.initialized = true;
+                    
+                    // Setup background music
+                    this.bgMusic = document.getElementById('bgMusic');
+                    if (this.bgMusic) {
+                        this.bgMusic.volume = 0.3;
+                    }
                 } catch(e) {
                     console.log('Audio not supported');
                 }
             }
 
+            toggle() {
+                this.enabled = !this.enabled;
+                if (this.bgMusic) {
+                    if (this.enabled) {
+                        this.bgMusic.play().catch(e => console.log('Music play failed'));
+                    } else {
+                        this.bgMusic.pause();
+                    }
+                }
+                return this.enabled;
+            }
+
             playNote(freq, duration = 0.2, type = 'sine') {
-                if (!this.initialized) return;
+                if (!this.initialized || !this.enabled) return;
                 const osc = this.context.createOscillator();
                 const gain = this.context.createGain();
                 
                 osc.type = type;
                 osc.frequency.value = freq;
-                gain.gain.value = 0.1;
+                gain.gain.value = 0.15;
                 
                 osc.connect(gain);
                 gain.connect(this.masterGain);
@@ -844,40 +1002,34 @@
             playCorrect() {
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, i) => {
-                    setTimeout(() => this.playNote(freq, 0.15), i * 40);
+                    setTimeout(() => this.playNote(freq, 0.15, 'triangle'), i * 40);
                 });
             }
 
             playWrong() {
-                this.playNote(200, 0.3);
+                this.playNote(200, 0.3, 'sawtooth');
             }
 
             playLevelUp() {
                 const notes = [392, 523, 659, 784, 1047];
                 notes.forEach((freq, i) => {
-                    setTimeout(() => this.playNote(freq, 0.2), i * 80);
+                    setTimeout(() => this.playNote(freq, 0.2, 'square'), i * 80);
                 });
             }
 
             startMusic() {
-                if (!this.initialized || this.musicInterval) return;
-                
-                const melody = [
-                    261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25,
-                    493.88, 440.00, 392.00, 349.23, 329.63, 293.66, 261.63, 293.66
-                ];
-                
-                let index = 0;
-                this.musicInterval = setInterval(() => {
-                    this.playNote(melody[index], 0.4, 'sine');
-                    index = (index + 1) % melody.length;
-                }, 500);
+                if (!this.initialized || !this.enabled) return;
+                if (this.bgMusic) {
+                    this.bgMusic.play().catch(e => {
+                        console.log('Music autoplay prevented, waiting for user interaction');
+                    });
+                }
             }
 
             stopMusic() {
-                if (this.musicInterval) {
-                    clearInterval(this.musicInterval);
-                    this.musicInterval = null;
+                if (this.bgMusic) {
+                    this.bgMusic.pause();
+                    this.bgMusic.currentTime = 0;
                 }
             }
         }
@@ -917,7 +1069,6 @@
                 this.speedMultiplier = 1.3;
                 
                 this.floatTimer = 0;
-                this.cloudTimer = 0;
                 
                 this.timer = 0;
                 this.maxTime = 60;
@@ -927,6 +1078,7 @@
                 
                 this.currentAnswer = '';
                 this.lastMode = 'easy';
+                this.isMobile = window.innerWidth <= 768;
                 
                 this.lastTime = 0;
                 this.paused = false;
@@ -939,8 +1091,12 @@
                     ));
                 }
                 
+                this.setupInput();
                 this.resize();
-                window.addEventListener('resize', () => this.resize());
+                window.addEventListener('resize', () => {
+                    this.resize();
+                    this.isMobile = window.innerWidth <= 768;
+                });
                 
                 this.loop(0);
             }
@@ -953,6 +1109,18 @@
                 
                 this.canvas.style.width = (this.width * scale) + 'px';
                 this.canvas.style.height = (this.height * scale) + 'px';
+            }
+
+            setupInput() {
+                const input = document.getElementById('answerInput');
+                if (input) {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && input.value.trim() !== '') {
+                            this.checkAnswer(parseInt(input.value));
+                            input.value = '';
+                        }
+                    });
+                }
             }
 
             inputNumber(num) {
@@ -978,7 +1146,9 @@
 
             updateAnswerDisplay() {
                 const display = document.getElementById('answerDisplay');
-                display.textContent = this.currentAnswer || '0';
+                if (display) {
+                    display.textContent = this.currentAnswer || '0';
+                }
             }
 
             submitAnswer() {
@@ -987,6 +1157,14 @@
                 this.checkAnswer(answer);
                 this.currentAnswer = '';
                 this.updateAnswerDisplay();
+            }
+
+            toggleAudio() {
+                const enabled = this.audio.toggle();
+                const btn = document.getElementById('audioToggle');
+                if (btn) {
+                    btn.textContent = enabled ? '🔊' : '🔇';
+                }
             }
 
             startGame(mode) {
@@ -1083,8 +1261,17 @@
                 document.getElementById('gameOver').classList.remove('active');
                 document.getElementById('hud').classList.add('active');
                 document.getElementById('pauseBtn').classList.add('active');
-                document.getElementById('answerDisplay').classList.add('active');
-                document.getElementById('numberPad').classList.add('active');
+                document.getElementById('audioToggle').classList.add('active');
+                
+                if (this.isMobile) {
+                    document.getElementById('answerDisplay').classList.add('active');
+                    document.getElementById('numberPad').classList.add('active');
+                    this.updateAnswerDisplay();
+                } else {
+                    const input = document.getElementById('answerInput');
+                    input.classList.add('active');
+                    input.focus();
+                }
                 
                 if (this.showTimer) {
                     document.getElementById('timerDisplay').style.display = 'block';
@@ -1106,8 +1293,6 @@
                     document.getElementById('levelDisplay').style.display = 'none';
                 }
                 
-                this.updateAnswerDisplay();
-                
                 this.audio.init();
                 this.audio.startMusic();
                 
@@ -1119,11 +1304,17 @@
                 this.paused = true;
                 this.audio.stopMusic();
                 document.getElementById('pauseMenu').classList.add('active');
+                if (!this.isMobile) {
+                    document.getElementById('answerInput').blur();
+                }
             }
 
             resume() {
                 this.paused = false;
                 document.getElementById('pauseMenu').classList.remove('active');
+                if (!this.isMobile) {
+                    document.getElementById('answerInput').focus();
+                }
                 this.audio.startMusic();
             }
 
@@ -1140,6 +1331,8 @@
                 document.getElementById('gameOver').classList.remove('active');
                 document.getElementById('hud').classList.remove('active');
                 document.getElementById('pauseBtn').classList.remove('active');
+                document.getElementById('audioToggle').classList.remove('active');
+                document.getElementById('answerInput').classList.remove('active');
                 document.getElementById('answerDisplay').classList.remove('active');
                 document.getElementById('numberPad').classList.remove('active');
                 document.getElementById('lives').classList.remove('active');
@@ -1180,7 +1373,6 @@
                     feedback.style.animation = 'feedbackAnim 1s ease-out';
                 }, 10);
 
-                // Increase difficulty
                 this.speedMultiplier += 0.15;
                 this.spawnRate = Math.max(1.5, this.spawnRate - 0.2);
             }
@@ -1190,6 +1382,8 @@
                 this.audio.stopMusic();
                 document.getElementById('hud').classList.remove('active');
                 document.getElementById('pauseBtn').classList.remove('active');
+                document.getElementById('audioToggle').classList.remove('active');
+                document.getElementById('answerInput').classList.remove('active');
                 document.getElementById('answerDisplay').classList.remove('active');
                 document.getElementById('numberPad').classList.remove('active');
                 document.getElementById('lives').classList.remove('active');
@@ -1437,14 +1631,12 @@
                     obj.draw(ctx);
                 }
                 
-                // Cute grass
                 const grassGrad = ctx.createLinearGradient(0, this.height - 60, 0, this.height);
                 grassGrad.addColorStop(0, '#7bed9f');
                 grassGrad.addColorStop(1, '#70a1ff');
                 ctx.fillStyle = grassGrad;
                 ctx.fillRect(0, this.height - 60, this.width, 60);
                 
-                // More flowers
                 ctx.font = '32px Arial';
                 const flowers = ['🌼', '🌸', '🌺', '🌻', '🌷', '🌹'];
                 for (let i = 0; i < 25; i++) {
