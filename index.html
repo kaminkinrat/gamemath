@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Math Multiverse: Touch Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
     <style>
         :root {
             --neon-blue: #00f2ff;
@@ -509,5 +513,12 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min + 1) + mi
 function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 window.onload = () => app.init();
 </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
 </body>
 </html>
+
