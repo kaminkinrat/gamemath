@@ -36,21 +36,58 @@
 
         canvas { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
 
-        /* Combo Effect Overlay */
+        /* Rainbow Fire Effect */
         #combo-flash {
             position: absolute; inset: 0;
             pointer-events: none;
-            border: 0px solid var(--neon-gold);
             z-index: 1800;
-            transition: border-width 0.1s;
+            opacity: 0;
+            transition: opacity 0.3s;
+            overflow: hidden;
         }
-        .flashing {
-            animation: border-pulse 0.4s infinite;
+        
+        #combo-flash.flashing {
+            opacity: 1;
         }
-        @keyframes border-pulse {
-            0% { border-width: 0px; box-shadow: inset 0 0 0px var(--neon-gold); }
-            50% { border-width: 15px; box-shadow: inset 0 0 50px var(--neon-gold); }
-            100% { border-width: 0px; box-shadow: inset 0 0 0px var(--neon-gold); }
+
+        /* Flame particles container */
+        .flame-container {
+            position: absolute;
+            inset: -20px;
+            filter: blur(8px) contrast(15);
+            background: transparent;
+        }
+
+        .flame {
+            position: absolute;
+            bottom: 0;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: burn 1s infinite;
+        }
+
+        @keyframes burn {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-150px) scale(0); opacity: 0; }
+        }
+
+        /* Border Glow Rainbow */
+        .rainbow-aura {
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.5);
+            animation: rainbow-anim 1s infinite;
+        }
+
+        @keyframes rainbow-anim {
+            0% { filter: hue-rotate(0deg); box-shadow: inset 0 0 60px red; }
+            25% { box-shadow: inset 0 0 60px yellow; }
+            50% { box-shadow: inset 0 0 60px green; }
+            75% { box-shadow: inset 0 0 60px blue; }
+            100% { filter: hue-rotate(360deg); box-shadow: inset 0 0 60px red; }
         }
 
         #orientation-overlay {
@@ -81,7 +118,7 @@
             box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
             max-height: 90dvh;
             overflow-y: auto;
-            touch-action: pan-y; /* อนุญาตให้เลื่อนขึ้นลงได้ */
+            touch-action: pan-y;
         }
 
         .title { 
@@ -171,7 +208,13 @@
 </div>
 
 <div id="game-container">
-    <div id="combo-flash"></div>
+    <div id="combo-flash">
+        <div class="rainbow-aura"></div>
+        <div id="flame-wall-bottom" class="flame-container"></div>
+        <div id="flame-wall-top" class="flame-container" style="top:0; bottom:auto; transform: scaleY(-1);"></div>
+        <div id="flame-wall-left" class="flame-container" style="left:0; right:auto; width:100px; height:100%; transform: rotate(90deg) scaleY(-1);"></div>
+        <div id="flame-wall-right" class="flame-container" style="right:0; left:auto; width:100px; height:100%; transform: rotate(-90deg) scaleY(-1);"></div>
+    </div>
     <canvas id="mathBgCanvas"></canvas>
     <canvas id="mainCanvas"></canvas>
 
@@ -212,7 +255,6 @@
 </div>
 
 <script>
-// ปรับความเร็วพื้นฐาน (SpeedMul) ให้เร็วขึ้นกว่าเดิม
 const MODES = [
     { id: 'baby', name: 'เบบี๋', emoji: '🍼', range: 5, ops: ['+'], speedMul: 0.7 },
     { id: 'v_easy', name: 'ง่ายมาก', emoji: '🌸', range: 10, ops: ['+', '-'], speedMul: 0.8 },
@@ -221,9 +263,9 @@ const MODES = [
     { id: 'multi', name: 'เซียนคูณ', emoji: '⚔️', range: 12, ops: ['*'], speedMul: 0.9 },
     { id: 'flash_div', name: 'หารสายฟ้า', emoji: '⚡', range: 10, ops: ['/'], speedMul: 1.2 },
     { id: 'sonic', name: 'โซนิค', emoji: '🚀', range: 25, ops: ['+', '-'], speedMul: 2.2 },
-    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 1.0, hideDelay: 200 }, // ลด hideDelay เหลือ 200 เพื่อให้ซ่อนไวขึ้น
+    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 1.0, hideDelay: 200 },
     { id: 'titan', name: 'บอสใหญ่', emoji: '👺', range: 60, ops: ['+', '-', '*'], speedMul: 1.6 },
-    { id: 'zen', name: 'ชิลๆ', emoji: '🎋', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
+    { id: 'zen', name: 'เซน', emoji: '🎋', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
 ];
 
 class SoundManager {
@@ -294,8 +336,24 @@ const app = {
         this.renderMenu();
         this.resize();
         this.initMathBg();
+        this.createFlameElements();
         window.addEventListener('resize', () => this.resize());
         this.loop();
+    },
+
+    createFlameElements() {
+        const containers = ['flame-wall-bottom', 'flame-wall-top'];
+        containers.forEach(id => {
+            const container = document.getElementById(id);
+            for(let i=0; i<30; i++) {
+                const f = document.createElement('div');
+                f.className = 'flame';
+                f.style.left = `${(i/30)*100}%`;
+                f.style.animationDelay = `${Math.random()}s`;
+                f.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 70%)`;
+                container.appendChild(f);
+            }
+        });
     },
 
     resize() {
@@ -324,7 +382,6 @@ const app = {
             const btn = document.createElement('button');
             btn.className = 'mode-btn';
             btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="m-name">${m.name}</span>`;
-            // ใช้ onclick แทน onpointerdown เพื่อให้ไม่ขัดขวางการเลื่อน Scroll ในมือถือ
             btn.onclick = () => { sfx.init(); this.start(m); };
             container.appendChild(btn);
         });
@@ -382,8 +439,6 @@ const app = {
 
         this.problems.push(prob);
         if (this.problems.length === 1) this.updateChoices();
-        
-        // เวลาเกิดโจทย์ใหม่จะเร็วขึ้นตามความเร็วเกม
         this.spawnDelay = Math.max(800, (2000 + Math.random() * 1500) / this.speedFactor);
     },
 
@@ -407,13 +462,11 @@ const app = {
             this.score += 10 + (this.combo * 2);
             this.combo++;
             
-            // เพิ่มความเร็วแบบทวีคูณถ้าเป็นโหมด Ramp (Hyper)
             if (this.activeMode.ramp) {
-                this.speedFactor += 0.08; // เพิ่มความเร็วขึ้น 8% ทุกข้อที่ถูก
+                this.speedFactor += 0.08;
             }
 
-            // เช็ค Combo 5
-            if (this.combo % 5 === 0) {
+            if (this.combo > 0 && this.combo % 5 === 0) {
                 this.triggerComboEffect();
             }
 
@@ -432,10 +485,14 @@ const app = {
 
     triggerComboEffect() {
         sfx.playCombo();
-        if (navigator.vibrate) navigator.vibrate([250, 100, 250, 100, 400]); // สั่นแรงขึ้น
+        // สั่นแรงมากและยาวขึ้นตามระดับความเทพ
+        if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100, 50, 100, 50, 800]); 
+        }
+        
         const flash = document.getElementById('combo-flash');
         flash.classList.add('flashing');
-        setTimeout(() => flash.classList.remove('flashing'), 2500);
+        setTimeout(() => flash.classList.remove('flashing'), 2800);
     },
 
     triggerPenalty() {
@@ -573,4 +630,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
