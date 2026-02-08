@@ -56,7 +56,7 @@
             height: 100%;
             display: none;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             pointer-events: all;
@@ -74,7 +74,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 30px;
+            margin: 20px 0;
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             animation: rainbowShift 3s ease infinite;
@@ -114,22 +114,28 @@
 
         .mode-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
             max-width: 900px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
+            max-height: 70vh;
+            overflow-y: auto;
         }
 
         .mode-card {
             background: white;
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             pointer-events: all;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .mode-card:hover {
@@ -138,19 +144,19 @@
         }
 
         .mode-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
+            font-size: 40px;
+            margin-bottom: 8px;
         }
 
         .mode-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .mode-desc {
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
         }
 
@@ -172,26 +178,26 @@
         }
 
         .hud-item {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 12px;
             border-radius: 20px;
             color: #667eea;
-            font-size: clamp(12px, 2.5vw, 18px);
+            font-size: clamp(11px, 2.5vw, 16px);
             font-weight: bold;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin: 5px;
+            margin: 3px;
         }
 
         #pauseBtn {
             position: absolute;
             top: 10px;
             right: 10px;
-            padding: 10px 20px;
+            padding: 8px 16px;
             background: rgba(255, 107, 107, 0.9);
             border: none;
             border-radius: 20px;
             color: #fff;
-            font-size: clamp(12px, 2.5vw, 16px);
+            font-size: clamp(11px, 2.5vw, 14px);
             cursor: pointer;
             pointer-events: all;
             z-index: 101;
@@ -204,40 +210,89 @@
             display: block;
         }
 
-        #answerInput {
+        #answerDisplay {
             position: absolute;
-            bottom: 20px;
+            bottom: 150px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 15px 30px;
-            font-size: clamp(20px, 5vw, 36px);
+            padding: 12px 25px;
+            font-size: clamp(24px, 6vw, 42px);
             font-family: 'Comic Sans MS', cursive;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border: 4px solid #667eea;
-            border-radius: 30px;
+            border-radius: 25px;
             color: #667eea;
             text-align: center;
-            width: 80%;
-            max-width: 300px;
+            width: 85%;
+            max-width: 280px;
             display: none;
-            pointer-events: all;
+            pointer-events: none;
             box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
             font-weight: bold;
+            min-height: 60px;
+            line-height: 1.2;
         }
 
-        #answerInput.active {
-            display: block;
+        #answerDisplay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        #answerInput:focus {
-            outline: none;
-            border-color: #ff6b6b;
-            box-shadow: 0 4px 30px rgba(255, 107, 107, 0.5);
+        #numberPad {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 90%;
+            max-width: 320px;
+            pointer-events: all;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
+        }
+
+        #numberPad.active {
+            display: grid;
+        }
+
+        .num-btn {
+            padding: 15px;
+            font-size: clamp(20px, 5vw, 28px);
+            font-family: 'Comic Sans MS', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .num-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .num-btn.special {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .num-btn.submit {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            grid-column: span 3;
         }
 
         .feedback {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: clamp(36px, 8vw, 72px);
@@ -251,24 +306,6 @@
             0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
             50% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
-        }
-
-        @media screen and (orientation: portrait) {
-            body::before {
-                content: '🔄 กรุณาหมุนหน้าจอเป็นแนวนอน';
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                color: #fff;
-                font-size: 24px;
-                text-align: center;
-                z-index: 10000;
-                background: rgba(102, 126, 234, 0.95);
-                padding: 30px;
-                border-radius: 20px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            }
         }
 
         .stars {
@@ -285,6 +322,52 @@
             50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
+
+        #lives {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(24px, 5vw, 36px);
+            display: none;
+            pointer-events: none;
+        }
+
+        #lives.active {
+            display: block;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+        }
+
+        .stats-box {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            font-size: clamp(14px, 3vw, 18px);
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: clamp(16px, 3.5vw, 22px);
+        }
     </style>
 </head>
 <body>
@@ -295,19 +378,37 @@
             <!-- Main Menu -->
             <div id="mainMenu" class="screen active">
                 <div class="title">🌈 Math Paradise 🌈</div>
-                <div style="color: #667eea; font-size: 18px; margin-bottom: 20px;">เลือกโหมดที่ชอบ</div>
+                <div style="color: #667eea; font-size: 16px; margin-bottom: 15px;">เลือกโหมดที่ชอบ</div>
                 
                 <div class="mode-grid">
+                    <div class="mode-card" onclick="game.startGame('baby')">
+                        <div class="mode-icon">🍼</div>
+                        <div class="mode-title">เด็กน้อยมาก</div>
+                        <div class="mode-desc">1+1, 2+1 ง่ายสุดๆ</div>
+                    </div>
+
                     <div class="mode-card" onclick="game.startGame('easy')">
                         <div class="mode-icon">🌸</div>
                         <div class="mode-title">โหมดง่ายมาก</div>
-                        <div class="mode-desc">บวกลบ 1-10 ช้าๆ</div>
+                        <div class="mode-desc">บวกลบ 1-10</div>
                     </div>
                     
                     <div class="mode-card" onclick="game.startGame('kids')">
                         <div class="mode-icon">🐰</div>
                         <div class="mode-title">โหมดเด็กน้อย</div>
                         <div class="mode-desc">บวกลบ 1-5 สนุกๆ</div>
+                    </div>
+
+                    <div class="mode-card" onclick="game.startGame('adventure')">
+                        <div class="mode-icon">🗺️</div>
+                        <div class="mode-title">โหมดผจญภัย</div>
+                        <div class="mode-desc">มี 5 ชีวิต ผ่านด่าน!</div>
+                    </div>
+
+                    <div class="mode-card" onclick="game.startGame('timeattack')">
+                        <div class="mode-icon">⚡</div>
+                        <div class="mode-title">แข่งกับเวลา</div>
+                        <div class="mode-desc">60 วิ ทำให้ได้มากสุด!</div>
                     </div>
                     
                     <div class="mode-card" onclick="game.startGame('relax')">
@@ -326,6 +427,12 @@
                         <div class="mode-icon">⭐</div>
                         <div class="mode-title">โหมดท้าทาย</div>
                         <div class="mode-desc">เร็วขึ้นเรื่อยๆ</div>
+                    </div>
+
+                    <div class="mode-card" onclick="game.startGame('speed')">
+                        <div class="mode-icon">🚀</div>
+                        <div class="mode-title">โหมดเร็วสุดๆ</div>
+                        <div class="mode-desc">ไวมาก ท้าทายสุดๆ!</div>
                     </div>
                     
                     <div class="mode-card" onclick="game.startGame('memory')">
@@ -357,8 +464,11 @@
 
             <!-- Game Over -->
             <div id="gameOver" class="screen">
-                <div class="title">✨ เก่งมากเลย! ✨</div>
-                <div id="finalScore" style="color: #667eea; font-size: 24px; margin: 20px;"></div>
+                <div class="title" id="gameOverTitle">✨ เก่งมากเลย! ✨</div>
+                <div class="stats-box" style="max-width: 400px; width: 90%;">
+                    <div id="finalScore"></div>
+                </div>
+                <button class="button" onclick="game.playAgain()">🔄 เล่นอีกรอบ</button>
                 <button class="button" onclick="game.backToMenu()">🏠 กลับหน้าหลัก</button>
             </div>
 
@@ -367,10 +477,29 @@
                 <div class="hud-item">⭐ <span id="score">0</span></div>
                 <div class="hud-item">🔥 <span id="streak">0</span></div>
                 <div class="hud-item" id="timerDisplay" style="display: none;">⏱️ <span id="timer">0</span></div>
+                <div class="hud-item" id="levelDisplay" style="display: none;">🎯 ด่าน <span id="level">1</span></div>
             </div>
 
+            <div id="lives">❤️❤️❤️❤️❤️</div>
+
             <button id="pauseBtn" onclick="game.pause()">⏸️ พัก</button>
-            <input type="number" id="answerInput" placeholder="?" inputmode="numeric">
+            <div id="answerDisplay">0</div>
+            
+            <div id="numberPad">
+                <button class="num-btn" onclick="game.inputNumber(1)">1</button>
+                <button class="num-btn" onclick="game.inputNumber(2)">2</button>
+                <button class="num-btn" onclick="game.inputNumber(3)">3</button>
+                <button class="num-btn" onclick="game.inputNumber(4)">4</button>
+                <button class="num-btn" onclick="game.inputNumber(5)">5</button>
+                <button class="num-btn" onclick="game.inputNumber(6)">6</button>
+                <button class="num-btn" onclick="game.inputNumber(7)">7</button>
+                <button class="num-btn" onclick="game.inputNumber(8)">8</button>
+                <button class="num-btn" onclick="game.inputNumber(9)">9</button>
+                <button class="num-btn special" onclick="game.clearInput()">⌫</button>
+                <button class="num-btn" onclick="game.inputNumber(0)">0</button>
+                <button class="num-btn special" onclick="game.inputMinus()">-</button>
+                <button class="num-btn submit" onclick="game.submitAnswer()">✓ ตอบ</button>
+            </div>
             
             <div class="feedback" id="feedback"></div>
             <div class="stars" id="stars">✨⭐✨</div>
@@ -392,7 +521,7 @@
                 this.emoji = emoji;
                 this.size = Math.random() * 20 + 30;
                 this.rotation = Math.random() * Math.PI * 2;
-                this.rotSpeed = (Math.random() - 0.5) * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 3;
                 this.alpha = 1;
                 this.life = 1;
             }
@@ -423,17 +552,17 @@
             constructor(x, y, color) {
                 this.pos = new Vector2(x, y);
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 200 + 100;
-                this.vel = new Vector2(Math.cos(angle) * speed, Math.sin(angle) * speed - 100);
+                const speed = Math.random() * 250 + 150;
+                this.vel = new Vector2(Math.cos(angle) * speed, Math.sin(angle) * speed - 150);
                 this.color = color;
                 this.life = 1;
-                this.size = Math.random() * 6 + 3;
+                this.size = Math.random() * 8 + 4;
             }
 
             update(dt) {
                 this.pos.x += this.vel.x * dt;
                 this.pos.y += this.vel.y * dt;
-                this.vel.y += 300 * dt;
+                this.vel.y += 400 * dt;
                 this.life -= dt * 1.5;
             }
 
@@ -453,7 +582,7 @@
             constructor(x, y, size) {
                 this.pos = new Vector2(x, y);
                 this.size = size;
-                this.speed = 10 + Math.random() * 20;
+                this.speed = 15 + Math.random() * 25;
             }
 
             update(dt, width) {
@@ -465,7 +594,7 @@
             }
 
             draw(ctx) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                 ctx.beginPath();
                 ctx.arc(this.pos.x, this.pos.y, this.size, 0, Math.PI * 2);
                 ctx.arc(this.pos.x + this.size * 0.7, this.pos.y - this.size * 0.3, this.size * 0.8, 0, Math.PI * 2);
@@ -475,20 +604,22 @@
         }
 
         class MathProblem {
-            constructor(x, y, mode) {
+            constructor(x, y, mode, level = 1) {
                 this.pos = new Vector2(x, y);
-                this.vel = new Vector2(0, 30);
+                this.vel = new Vector2(0, 40);
                 this.mode = mode;
+                this.level = level;
                 this.generate();
                 this.width = 140;
                 this.height = 70;
                 this.answered = false;
                 this.showQuestion = true;
                 this.color = this.getRandomColor();
+                this.wobble = 0;
             }
 
             getRandomColor() {
-                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#00d2d3'];
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#00d2d3', '#ff9ff3', '#54a0ff'];
                 return colors[Math.floor(Math.random() * colors.length)];
             }
 
@@ -496,6 +627,13 @@
                 let a, b, op;
                 
                 switch(this.mode) {
+                    case 'baby':
+                        a = Math.floor(Math.random() * 3) + 1;
+                        b = Math.floor(Math.random() * 3) + 1;
+                        this.question = `${a} + ${b}`;
+                        this.answer = a + b;
+                        break;
+
                     case 'easy':
                         a = Math.floor(Math.random() * 10) + 1;
                         b = Math.floor(Math.random() * 10) + 1;
@@ -511,6 +649,25 @@
                         this.question = `${a} + ${b}`;
                         this.answer = a + b;
                         break;
+
+                    case 'adventure':
+                        const maxNum = Math.min(10 + this.level * 2, 20);
+                        a = Math.floor(Math.random() * maxNum) + 1;
+                        b = Math.floor(Math.random() * maxNum) + 1;
+                        op = Math.random() < 0.6 ? '+' : '-';
+                        if (op === '-' && a < b) [a, b] = [b, a];
+                        this.question = `${a} ${op} ${b}`;
+                        this.answer = op === '+' ? a + b : a - b;
+                        break;
+
+                    case 'timeattack':
+                        a = Math.floor(Math.random() * 15) + 1;
+                        b = Math.floor(Math.random() * 15) + 1;
+                        op = ['+', '-'][Math.floor(Math.random() * 2)];
+                        if (op === '-' && a < b) [a, b] = [b, a];
+                        this.question = `${a} ${op} ${b}`;
+                        this.answer = op === '+' ? a + b : a - b;
+                        break;
                         
                     case 'relax':
                     case 'zen':
@@ -520,12 +677,13 @@
                         if (op === '-' && a < b) [a, b] = [b, a];
                         this.question = `${a} ${op} ${b}`;
                         this.answer = op === '+' ? a + b : a - b;
-                        this.vel.y = 20; // Slower
+                        this.vel.y = 25;
                         break;
                         
                     case 'practice':
                     case 'challenge':
                     case 'rainbow':
+                    case 'speed':
                         const ops = ['+', '-', '×'];
                         op = ops[Math.floor(Math.random() * ops.length)];
                         
@@ -548,7 +706,6 @@
                         b = Math.floor(Math.random() * 10) + 1;
                         this.question = `${a} + ${b}`;
                         this.answer = a + b;
-                        // Hide question after 2 seconds
                         setTimeout(() => {
                             this.showQuestion = false;
                         }, 2000);
@@ -558,26 +715,36 @@
 
             update(dt, speedMultiplier = 1) {
                 this.pos.y += this.vel.y * dt * speedMultiplier;
+                this.wobble += dt * 5;
             }
 
             draw(ctx) {
-                // Cute rounded rectangle
                 const x = this.pos.x - this.width/2;
                 const y = this.pos.y - this.height/2;
                 const r = 15;
                 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                // Gentle wobble
+                const wobbleX = Math.sin(this.wobble) * 2;
+                
+                ctx.save();
+                ctx.translate(wobbleX, 0);
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
                 ctx.beginPath();
                 ctx.roundRect(x, y, this.width, this.height, r);
                 ctx.fill();
                 
                 ctx.strokeStyle = this.color;
-                ctx.lineWidth = 4;
+                ctx.lineWidth = 5;
                 ctx.stroke();
                 
-                // Question text
+                // Cute sparkle
                 ctx.fillStyle = this.color;
-                ctx.font = 'bold 28px Comic Sans MS';
+                ctx.font = '16px Arial';
+                ctx.fillText('✨', x + this.width - 20, y + 20);
+                
+                ctx.fillStyle = this.color;
+                ctx.font = 'bold 30px Comic Sans MS';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
@@ -586,6 +753,8 @@
                 } else {
                     ctx.fillText('???', this.pos.x, this.pos.y);
                 }
+                
+                ctx.restore();
             }
 
             isOffScreen(height) {
@@ -596,13 +765,15 @@
         class Character {
             constructor(x, y) {
                 this.pos = new Vector2(x, y);
-                this.size = 50;
+                this.size = 60;
                 this.bounceTime = 0;
                 this.expression = '😊';
+                this.scale = 1;
             }
 
             update(dt) {
-                this.bounceTime += dt * 3;
+                this.bounceTime += dt * 4;
+                this.scale = 1 + Math.sin(this.bounceTime * 2) * 0.05;
             }
 
             setExpression(expr) {
@@ -610,12 +781,25 @@
             }
 
             draw(ctx) {
-                const bounce = Math.sin(this.bounceTime) * 5;
+                const bounce = Math.sin(this.bounceTime) * 8;
+                
+                ctx.save();
+                ctx.translate(this.pos.x, this.pos.y + bounce);
+                ctx.scale(this.scale, this.scale);
                 
                 ctx.font = `${this.size}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.expression, this.pos.x, this.pos.y + bounce);
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillText(this.expression, 2, 2);
+                
+                // Character
+                ctx.fillStyle = '#000';
+                ctx.fillText(this.expression, 0, 0);
+                
+                ctx.restore();
             }
         }
 
@@ -625,7 +809,6 @@
                 this.masterGain = null;
                 this.initialized = false;
                 this.musicInterval = null;
-                this.currentNote = 0;
             }
 
             init() {
@@ -659,20 +842,26 @@
             }
 
             playCorrect() {
-                const notes = [523.25, 659.25, 783.99]; // C, E, G
+                const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, i) => {
-                    setTimeout(() => this.playNote(freq, 0.15), i * 50);
+                    setTimeout(() => this.playNote(freq, 0.15), i * 40);
                 });
             }
 
             playWrong() {
-                this.playNote(300, 0.3);
+                this.playNote(200, 0.3);
+            }
+
+            playLevelUp() {
+                const notes = [392, 523, 659, 784, 1047];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playNote(freq, 0.2), i * 80);
+                });
             }
 
             startMusic() {
                 if (!this.initialized || this.musicInterval) return;
                 
-                // Gentle melody (C major scale)
                 const melody = [
                     261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25,
                     493.88, 440.00, 392.00, 349.23, 329.63, 293.66, 261.63, 293.66
@@ -709,6 +898,11 @@
                 this.bestStreak = 0;
                 this.totalAnswered = 0;
                 this.correctAnswers = 0;
+                this.lives = 5;
+                this.maxLives = 5;
+                this.level = 1;
+                this.levelProgress = 0;
+                this.levelTarget = 10;
                 
                 this.problems = [];
                 this.particles = [];
@@ -719,20 +913,25 @@
                 this.audio = new AudioSystem();
                 
                 this.spawnTimer = 0;
-                this.spawnRate = 3;
-                this.speedMultiplier = 1;
+                this.spawnRate = 2.5;
+                this.speedMultiplier = 1.3;
                 
                 this.floatTimer = 0;
                 this.cloudTimer = 0;
                 
                 this.timer = 0;
+                this.maxTime = 60;
                 this.showTimer = false;
+                this.showLives = false;
+                this.showLevel = false;
+                
+                this.currentAnswer = '';
+                this.lastMode = 'easy';
                 
                 this.lastTime = 0;
                 this.paused = false;
                 
-                // Initialize clouds
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 6; i++) {
                     this.clouds.push(new Cloud(
                         Math.random() * this.width,
                         Math.random() * 200,
@@ -740,7 +939,6 @@
                     ));
                 }
                 
-                this.setupInput();
                 this.resize();
                 window.addEventListener('resize', () => this.resize());
                 
@@ -757,53 +955,127 @@
                 this.canvas.style.height = (this.height * scale) + 'px';
             }
 
-            setupInput() {
-                const input = document.getElementById('answerInput');
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && input.value.trim() !== '') {
-                        this.checkAnswer(parseInt(input.value));
-                        input.value = '';
-                    }
-                });
+            inputNumber(num) {
+                if (this.currentAnswer.length < 4) {
+                    this.currentAnswer += num;
+                    this.updateAnswerDisplay();
+                }
+            }
+
+            inputMinus() {
+                if (this.currentAnswer === '' || this.currentAnswer === '0') {
+                    this.currentAnswer = '-';
+                    this.updateAnswerDisplay();
+                }
+            }
+
+            clearInput() {
+                if (this.currentAnswer.length > 0) {
+                    this.currentAnswer = this.currentAnswer.slice(0, -1);
+                    this.updateAnswerDisplay();
+                }
+            }
+
+            updateAnswerDisplay() {
+                const display = document.getElementById('answerDisplay');
+                display.textContent = this.currentAnswer || '0';
+            }
+
+            submitAnswer() {
+                if (this.currentAnswer === '' || this.currentAnswer === '-') return;
+                const answer = parseInt(this.currentAnswer);
+                this.checkAnswer(answer);
+                this.currentAnswer = '';
+                this.updateAnswerDisplay();
             }
 
             startGame(mode) {
                 this.mode = mode;
+                this.lastMode = mode;
                 this.state = 'playing';
                 this.score = 0;
                 this.streak = 0;
                 this.bestStreak = 0;
                 this.totalAnswered = 0;
                 this.correctAnswers = 0;
+                this.lives = 5;
+                this.level = 1;
+                this.levelProgress = 0;
                 this.problems = [];
                 this.particles = [];
                 this.floatingObjects = [];
                 this.spawnTimer = 0;
                 this.timer = 0;
                 this.paused = false;
+                this.currentAnswer = '';
                 
-                // Mode specific settings
                 switch(mode) {
+                    case 'baby':
+                        this.spawnRate = 3.5;
+                        this.speedMultiplier = 0.7;
+                        this.showTimer = false;
+                        this.showLives = false;
+                        this.showLevel = false;
+                        break;
+
                     case 'easy':
                     case 'kids':
-                        this.spawnRate = 4;
-                        this.speedMultiplier = 0.8;
-                        break;
-                    case 'relax':
-                    case 'zen':
-                        this.spawnRate = 5;
-                        this.speedMultiplier = 0.6;
-                        this.showTimer = false;
-                        break;
-                    case 'challenge':
-                        this.spawnRate = 2;
-                        this.speedMultiplier = 1.2;
-                        this.showTimer = true;
-                        break;
-                    default:
                         this.spawnRate = 3;
                         this.speedMultiplier = 1;
                         this.showTimer = false;
+                        this.showLives = false;
+                        this.showLevel = false;
+                        break;
+
+                    case 'adventure':
+                        this.spawnRate = 2.8;
+                        this.speedMultiplier = 1.1;
+                        this.showTimer = false;
+                        this.showLives = true;
+                        this.showLevel = true;
+                        this.levelTarget = 10;
+                        break;
+
+                    case 'timeattack':
+                        this.spawnRate = 2;
+                        this.speedMultiplier = 1.4;
+                        this.showTimer = true;
+                        this.showLives = false;
+                        this.showLevel = false;
+                        this.maxTime = 60;
+                        break;
+
+                    case 'relax':
+                    case 'zen':
+                        this.spawnRate = 4;
+                        this.speedMultiplier = 0.7;
+                        this.showTimer = false;
+                        this.showLives = false;
+                        this.showLevel = false;
+                        break;
+
+                    case 'challenge':
+                        this.spawnRate = 2.2;
+                        this.speedMultiplier = 1.5;
+                        this.showTimer = true;
+                        this.showLives = false;
+                        this.showLevel = false;
+                        break;
+
+                    case 'speed':
+                        this.spawnRate = 1.5;
+                        this.speedMultiplier = 2;
+                        this.showTimer = false;
+                        this.showLives = true;
+                        this.showLevel = false;
+                        break;
+
+                    default:
+                        this.spawnRate = 2.5;
+                        this.speedMultiplier = 1.3;
+                        this.showTimer = false;
+                        this.showLives = false;
+                        this.showLevel = false;
                 }
                 
                 document.getElementById('mainMenu').classList.remove('active');
@@ -811,14 +1083,30 @@
                 document.getElementById('gameOver').classList.remove('active');
                 document.getElementById('hud').classList.add('active');
                 document.getElementById('pauseBtn').classList.add('active');
-                document.getElementById('answerInput').classList.add('active');
-                document.getElementById('answerInput').focus();
+                document.getElementById('answerDisplay').classList.add('active');
+                document.getElementById('numberPad').classList.add('active');
                 
                 if (this.showTimer) {
                     document.getElementById('timerDisplay').style.display = 'block';
                 } else {
                     document.getElementById('timerDisplay').style.display = 'none';
                 }
+
+                if (this.showLives) {
+                    document.getElementById('lives').classList.add('active');
+                    this.updateLivesDisplay();
+                } else {
+                    document.getElementById('lives').classList.remove('active');
+                }
+
+                if (this.showLevel) {
+                    document.getElementById('levelDisplay').style.display = 'block';
+                    document.getElementById('level').textContent = this.level;
+                } else {
+                    document.getElementById('levelDisplay').style.display = 'none';
+                }
+                
+                this.updateAnswerDisplay();
                 
                 this.audio.init();
                 this.audio.startMusic();
@@ -831,14 +1119,16 @@
                 this.paused = true;
                 this.audio.stopMusic();
                 document.getElementById('pauseMenu').classList.add('active');
-                document.getElementById('answerInput').blur();
             }
 
             resume() {
                 this.paused = false;
                 document.getElementById('pauseMenu').classList.remove('active');
-                document.getElementById('answerInput').focus();
                 this.audio.startMusic();
+            }
+
+            playAgain() {
+                this.startGame(this.lastMode);
             }
 
             backToMenu() {
@@ -850,48 +1140,107 @@
                 document.getElementById('gameOver').classList.remove('active');
                 document.getElementById('hud').classList.remove('active');
                 document.getElementById('pauseBtn').classList.remove('active');
-                document.getElementById('answerInput').classList.remove('active');
+                document.getElementById('answerDisplay').classList.remove('active');
+                document.getElementById('numberPad').classList.remove('active');
+                document.getElementById('lives').classList.remove('active');
             }
 
-            gameOver() {
+            updateLivesDisplay() {
+                const hearts = '❤️'.repeat(this.lives) + '🖤'.repeat(this.maxLives - this.lives);
+                document.getElementById('lives').textContent = hearts;
+                
+                if (this.lives <= 2) {
+                    document.getElementById('lives').style.animation = 'heartbeat 0.5s infinite';
+                } else {
+                    document.getElementById('lives').style.animation = '';
+                }
+            }
+
+            loseLife() {
+                this.lives--;
+                this.updateLivesDisplay();
+                
+                if (this.lives <= 0) {
+                    this.gameOver('หมดชีวิตแล้ว! 💔');
+                }
+            }
+
+            levelUp() {
+                this.level++;
+                this.levelProgress = 0;
+                this.audio.playLevelUp();
+                
+                document.getElementById('level').textContent = this.level;
+                
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = `🎉 ผ่านด่าน ${this.level}! 🎉`;
+                feedback.style.color = '#f7b731';
+                feedback.style.animation = 'none';
+                setTimeout(() => {
+                    feedback.style.animation = 'feedbackAnim 1s ease-out';
+                }, 10);
+
+                // Increase difficulty
+                this.speedMultiplier += 0.15;
+                this.spawnRate = Math.max(1.5, this.spawnRate - 0.2);
+            }
+
+            gameOver(reason = '') {
                 this.state = 'gameover';
                 this.audio.stopMusic();
                 document.getElementById('hud').classList.remove('active');
                 document.getElementById('pauseBtn').classList.remove('active');
-                document.getElementById('answerInput').classList.remove('active');
+                document.getElementById('answerDisplay').classList.remove('active');
+                document.getElementById('numberPad').classList.remove('active');
+                document.getElementById('lives').classList.remove('active');
                 document.getElementById('gameOver').classList.add('active');
                 
                 const accuracy = this.totalAnswered > 0 ? 
                     Math.round((this.correctAnswers / this.totalAnswered) * 100) : 0;
                 
-                let message = `🌟 คะแนน: ${this.score}<br>`;
-                message += `🔥 ต่อเนื่องสูงสุด: ${this.bestStreak}<br>`;
-                message += `✅ ตอบถูก: ${this.correctAnswers}/${this.totalAnswered}<br>`;
-                message += `📊 ความแม่นยำ: ${accuracy}%<br>`;
-                
-                if (this.showTimer) {
-                    message += `⏱️ เวลา: ${Math.floor(this.timer)} วินาที`;
+                let title = '✨ เก่งมากเลย! ✨';
+                if (reason) {
+                    title = reason;
+                } else if (accuracy >= 90) {
+                    title = '🌟 ยอดเยี่ยมมาก! 🌟';
+                } else if (accuracy >= 70) {
+                    title = '⭐ เก่งมาก! ⭐';
                 }
                 
-                document.getElementById('finalScore').innerHTML = message;
+                document.getElementById('gameOverTitle').textContent = title;
+                
+                let stats = '';
+                stats += `<div class="stat-row"><span class="stat-label">คะแนนทั้งหมด</span><span class="stat-value">⭐ ${Math.floor(this.score)}</span></div>`;
+                stats += `<div class="stat-row"><span class="stat-label">ต่อเนื่องสูงสุด</span><span class="stat-value">🔥 ${this.bestStreak}</span></div>`;
+                stats += `<div class="stat-row"><span class="stat-label">ตอบถูก</span><span class="stat-value">✅ ${this.correctAnswers}/${this.totalAnswered}</span></div>`;
+                stats += `<div class="stat-row"><span class="stat-label">ความแม่นยำ</span><span class="stat-value">📊 ${accuracy}%</span></div>`;
+                
+                if (this.showTimer) {
+                    stats += `<div class="stat-row"><span class="stat-label">เวลาที่ใช้</span><span class="stat-value">⏱️ ${Math.floor(this.timer)} วิ</span></div>`;
+                }
+
+                if (this.showLevel) {
+                    stats += `<div class="stat-row"><span class="stat-label">ด่านสูงสุด</span><span class="stat-value">🎯 ${this.level}</span></div>`;
+                }
+                
+                document.getElementById('finalScore').innerHTML = stats;
             }
 
             spawnProblem() {
                 const x = Math.random() * (this.width - 280) + 140;
-                this.problems.push(new MathProblem(x, -50, this.mode));
+                this.problems.push(new MathProblem(x, -50, this.mode, this.level));
             }
 
             spawnFloatingObject() {
-                const emojis = ['🌸', '🌺', '🌼', '🦋', '🐝', '⭐', '✨', '💫', '🌟', '🎈', '🎨', '🌈'];
+                const emojis = ['🌸', '🌺', '🌼', '🦋', '🐝', '⭐', '✨', '💫', '🌟', '🎈', '🎨', '🌈', '🍀', '🌻', '🐞'];
                 const emoji = emojis[Math.floor(Math.random() * emojis.length)];
                 const x = Math.random() * this.width;
-                this.floatingObjects.push(new FloatingObject(x, this.height + 50, emoji, 50 + Math.random() * 50));
+                this.floatingObjects.push(new FloatingObject(x, this.height + 50, emoji, 60 + Math.random() * 60));
             }
 
             checkAnswer(answer) {
                 if (this.problems.length === 0) return;
                 
-                // Find the lowest problem on screen
                 let targetProblem = null;
                 let lowestY = -Infinity;
                 
@@ -908,16 +1257,26 @@
                 this.totalAnswered++;
                 
                 if (targetProblem.answer === answer) {
-                    // Correct!
                     this.correctAnswers++;
                     this.audio.playCorrect();
-                    this.score += 10 * (1 + this.streak * 0.5);
+                    
+                    const baseScore = 10;
+                    const streakBonus = this.streak * 0.5;
+                    const levelBonus = (this.level - 1) * 2;
+                    this.score += baseScore * (1 + streakBonus + levelBonus);
+                    
                     this.streak++;
                     this.bestStreak = Math.max(this.bestStreak, this.streak);
                     
-                    // Show feedback
+                    if (this.showLevel) {
+                        this.levelProgress++;
+                        if (this.levelProgress >= this.levelTarget) {
+                            this.levelUp();
+                        }
+                    }
+                    
+                    const messages = ['เก่ง! 🎉', 'ถูกต้อง! ✨', 'เยี่ยม! ⭐', 'สุดยอด! 🌟', 'ว้าว! 💫', 'เจ๋ง! 🎊'];
                     const feedback = document.getElementById('feedback');
-                    const messages = ['เก่ง! 🎉', 'ถูกต้อง! ✨', 'เยี่ยม! ⭐', 'สุดยอด! 🌟'];
                     feedback.textContent = messages[Math.floor(Math.random() * messages.length)];
                     feedback.style.color = '#4ecdc4';
                     feedback.style.animation = 'none';
@@ -925,7 +1284,6 @@
                         feedback.style.animation = 'feedbackAnim 0.6s ease-out';
                     }, 10);
                     
-                    // Show stars for streak
                     if (this.streak > 0 && this.streak % 3 === 0) {
                         const stars = document.getElementById('stars');
                         stars.style.animation = 'none';
@@ -934,9 +1292,8 @@
                         }, 10);
                     }
                     
-                    // Particles
-                    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd'];
-                    for (let i = 0; i < 15; i++) {
+                    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#00d2d3', '#ff9ff3', '#54a0ff'];
+                    for (let i = 0; i < 20; i++) {
                         this.particles.push(new Particle(
                             targetProblem.pos.x,
                             targetProblem.pos.y,
@@ -949,9 +1306,12 @@
                     setTimeout(() => this.character.setExpression('😊'), 500);
                     
                 } else {
-                    // Wrong
                     this.audio.playWrong();
                     this.streak = 0;
+                    
+                    if (this.showLives) {
+                        this.loseLife();
+                    }
                     
                     const feedback = document.getElementById('feedback');
                     feedback.textContent = 'ลองใหม่นะ 💪';
@@ -973,39 +1333,47 @@
                 
                 if (this.showTimer) {
                     this.timer += dt;
-                    document.getElementById('timer').textContent = Math.floor(this.timer);
+                    const remaining = Math.max(0, this.maxTime - this.timer);
+                    document.getElementById('timer').textContent = Math.ceil(remaining);
+                    
+                    if (this.mode === 'timeattack' && remaining <= 0) {
+                        this.gameOver('⏰ หมดเวลา!');
+                        return;
+                    }
                 }
                 
                 this.character.update(dt);
                 
-                // Spawn problems
                 this.spawnTimer += dt;
                 if (this.spawnTimer > this.spawnRate) {
                     this.spawnProblem();
                     this.spawnTimer = 0;
                 }
                 
-                // Spawn floating objects
                 this.floatTimer += dt;
-                if (this.floatTimer > 1.5) {
+                if (this.floatTimer > 1.2) {
                     this.spawnFloatingObject();
                     this.floatTimer = 0;
                 }
                 
-                // Update clouds
                 for (let cloud of this.clouds) {
                     cloud.update(dt, this.width);
                 }
                 
-                // Update problems
                 for (let i = this.problems.length - 1; i >= 0; i--) {
                     const prob = this.problems[i];
                     prob.update(dt, this.speedMultiplier);
                     
                     if (prob.isOffScreen(this.height)) {
-                        if (!prob.answered && this.mode !== 'relax' && this.mode !== 'zen') {
-                            this.streak = 0;
-                            this.totalAnswered++;
+                        if (!prob.answered) {
+                            if (this.mode !== 'relax' && this.mode !== 'zen') {
+                                this.streak = 0;
+                                this.totalAnswered++;
+                                
+                                if (this.showLives) {
+                                    this.loseLife();
+                                }
+                            }
                         }
                         this.problems.splice(i, 1);
                     } else if (prob.answered) {
@@ -1013,7 +1381,6 @@
                     }
                 }
                 
-                // Update particles
                 for (let i = this.particles.length - 1; i >= 0; i--) {
                     this.particles[i].update(dt);
                     if (this.particles[i].life <= 0) {
@@ -1021,7 +1388,6 @@
                     }
                 }
                 
-                // Update floating objects
                 for (let i = this.floatingObjects.length - 1; i >= 0; i--) {
                     this.floatingObjects[i].update(dt);
                     if (this.floatingObjects[i].life <= 0) {
@@ -1040,11 +1406,9 @@
             draw() {
                 const ctx = this.ctx;
                 
-                // Sky gradient background
                 const skyGrad = ctx.createLinearGradient(0, 0, 0, this.height);
                 
                 if (this.mode === 'rainbow') {
-                    // Rainbow background
                     skyGrad.addColorStop(0, '#ff9a9e');
                     skyGrad.addColorStop(0.2, '#fad0c4');
                     skyGrad.addColorStop(0.4, '#ffecd2');
@@ -1052,11 +1416,12 @@
                     skyGrad.addColorStop(0.8, '#a1c4fd');
                     skyGrad.addColorStop(1, '#c2e9fb');
                 } else if (this.mode === 'zen') {
-                    // Zen gradient
                     skyGrad.addColorStop(0, '#e0c3fc');
                     skyGrad.addColorStop(1, '#8ec5fc');
+                } else if (this.mode === 'speed') {
+                    skyGrad.addColorStop(0, '#fa709a');
+                    skyGrad.addColorStop(1, '#fee140');
                 } else {
-                    // Default cute gradient
                     skyGrad.addColorStop(0, '#a8edea');
                     skyGrad.addColorStop(1, '#fed6e3');
                 }
@@ -1064,35 +1429,35 @@
                 ctx.fillStyle = skyGrad;
                 ctx.fillRect(0, 0, this.width, this.height);
                 
-                // Draw clouds
                 for (let cloud of this.clouds) {
                     cloud.draw(ctx);
                 }
                 
-                // Draw floating objects
                 for (let obj of this.floatingObjects) {
                     obj.draw(ctx);
                 }
                 
-                // Ground
-                ctx.fillStyle = '#90ee90';
+                // Cute grass
+                const grassGrad = ctx.createLinearGradient(0, this.height - 60, 0, this.height);
+                grassGrad.addColorStop(0, '#7bed9f');
+                grassGrad.addColorStop(1, '#70a1ff');
+                ctx.fillStyle = grassGrad;
                 ctx.fillRect(0, this.height - 60, this.width, 60);
                 
-                // Flowers on ground
-                ctx.font = '30px Arial';
-                for (let i = 0; i < 20; i++) {
-                    ctx.fillText('🌼', i * 70, this.height - 20);
+                // More flowers
+                ctx.font = '32px Arial';
+                const flowers = ['🌼', '🌸', '🌺', '🌻', '🌷', '🌹'];
+                for (let i = 0; i < 25; i++) {
+                    const flower = flowers[i % flowers.length];
+                    ctx.fillText(flower, i * 55, this.height - 15);
                 }
                 
-                // Draw particles
                 for (let particle of this.particles) {
                     particle.draw(ctx);
                 }
                 
-                // Draw character
                 this.character.draw(ctx);
                 
-                // Draw problems
                 for (let prob of this.problems) {
                     prob.draw(ctx);
                 }
@@ -1112,7 +1477,6 @@
             }
         }
 
-        // Start game
         const game = new Game();
     </script>
 </body>
