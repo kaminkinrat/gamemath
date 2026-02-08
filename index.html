@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Pixel Math Legends: Forest of Infinity</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @font-face {
+            font-family: 'PixelFont';
+            src: local('Courier New'), local('monospace');
+        }
+
+        body {
+            font-family: 'PixelFont', 'Courier New', monospace;
+            background: #1a1a2e;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            touch-action: none;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, #0f3460 0%, #16213e 100%);
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 100%;
+            max-height: 100%;
+            image-rendering: pixelated;
+        }
+
+        /* Menu Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Title */
+        .title {
+            font-size: clamp(24px, 6vw, 48px);
+            color: #fff;
+            text-shadow: 4px 4px 0 #e94560, 8px 8px 0 rgba(233, 69, 96, 0.3);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .subtitle {
+            font-size: clamp(12px, 3vw, 18px);
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, #e94560 0%, #c93154 100%);
+            color: #fff;
+            border: 3px solid #fff;
+            padding: 12px 30px;
+            font-size: clamp(14px, 3vw, 18px);
+            font-family: inherit;
+            cursor: pointer;
+            margin: 8px;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.1s;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-small {
+            padding: 8px 20px;
+            font-size: clamp(12px, 2.5vw, 16px);
+            min-width: 120px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+
+        /* Character Selection */
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            max-width: 600px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #fff;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .character-card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .character-card.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .character-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .character-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .character-name {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .character-level {
+            color: #ffd700;
+            font-size: 12px;
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            z-index: 10;
+            display: none;
+            pointer-events: none;
+        }
+
+        #hud.active {
+            display: block;
+        }
+
+        .hud-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-bar {
+            flex: 1;
+            min-width: 150px;
+            max-width: 300px;
+        }
+
+        .stat-label {
+            color: #fff;
+            font-size: 12px;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bar-container {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #fff;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .hp-bar { background: linear-gradient(90deg, #e94560 0%, #ff6b81 100%); }
+        .exp-bar { background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%); }
+        .combo-bar { background: linear-gradient(90deg, #4a90e2 0%, #64b5f6 100%); }
+
+        .bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 11px;
+            text-shadow: 1px 1px 2px #000;
+            z-index: 1;
+            white-space: nowrap;
+        }
+
+        .info-box {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #fff;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        /* Answer Buttons */
+        #answer-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 10px;
+            z-index: 15;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 20px;
+            max-width: 100%;
+        }
+
+        #answer-container.active {
+            display: flex;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: #fff;
+            border: 3px solid #fff;
+            padding: 15px 25px;
+            font-size: clamp(16px, 4vw, 24px);
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.1s;
+            min-width: 80px;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .answer-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            animation: pulse 0.3s;
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, #e94560 0%, #c93154 100%);
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Question Display */
+        #question-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #ffd700;
+            padding: 25px 35px;
+            color: #fff;
+            font-size: clamp(24px, 6vw, 42px);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            display: none;
+            z-index: 12;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        #question-display.active {
+            display: block;
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Floating Damage */
+        .damage-text {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 20;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-60px); }
+        }
+
+        /* Pause Menu */
+        .pause-menu {
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        .menu-content {
+            background: rgba(255, 255, 255, 0.1);
+            border: 4px solid #fff;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .menu-title {
+            font-size: clamp(24px, 5vw, 36px);
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            color: #ffd700;
+            font-size: clamp(18px, 4vw, 24px);
+            margin-bottom: 5px;
+        }
+
+        .stat-name {
+            color: #fff;
+            font-size: clamp(10px, 2vw, 14px);
+        }
+
+        /* Landscape Warning */
+        .landscape-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .rotate-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            .landscape-warning {
+                display: flex;
+            }
+        }
+
+        /* Upgrade Shop */
+        .upgrade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .upgrade-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #fff;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .upgrade-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .upgrade-name {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .upgrade-cost {
+            color: #ffd700;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .upgrade-level {
+            color: #4a90e2;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        /* Loading */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 24px;
+            z-index: 1000;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .btn {
+                padding: 10px 20px;
+                min-width: 150px;
+            }
+
+            .character-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .hud-row {
+                font-size: 10px;
+            }
+
+            .answer-btn {
+                padding: 12px 20px;
+                min-width: 70px;
+            }
+        }
+
+        /* Combo Indicator */
+        .combo-indicator {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ffd700;
+            padding: 15px;
+            z-index: 11;
+            display: none;
+            animation: bounce 0.5s infinite;
+        }
+
+        .combo-indicator.active {
+            display: block;
+        }
+
+        .combo-text {
+            color: #ffd700;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .combo-count {
+            color: #fff;
+            font-size: 48px;
+            text-align: center;
+            text-shadow: 3px 3px 6px #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="landscape-warning">
+        <div class="rotate-icon">📱🔄</div>
+        <h2 style="color: #fff; font-size: 24px; margin-bottom: 10px;">กรุณาหันหน้าจอเป็นแนวนอน</h2>
+        <p style="color: #aaa; font-size: 16px;">Please rotate your device to landscape mode</p>
+    </div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-row">
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>❤️ พลังชีวิต</span>
+                        <span id="hp-text">100/100</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill hp-bar" id="hp-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <div>⭐ เลเวล: <span id="level-text">1</span></div>
+                    <div>💰 คะแนน: <span id="score-text">0</span></div>
+                </div>
+            </div>
+            <div class="hud-row">
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>✨ ประสบการณ์</span>
+                        <span id="exp-text">0/100</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill exp-bar" id="exp-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-label">
+                        <span>🔥 คอมโบ</span>
+                        <span id="combo-text">0</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill combo-bar" id="combo-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combo Indicator -->
+        <div class="combo-indicator" id="combo-indicator">
+            <div class="combo-text">COMBO!</div>
+            <div class="combo-count" id="combo-count">0</div>
+        </div>
+
+        <!-- Question Display -->
+        <div id="question-display"></div>
+
+        <!-- Answer Buttons -->
+        <div id="answer-container"></div>
+
+        <!-- Main Menu -->
+        <div class="screen active" id="main-menu">
+            <div style="text-align: center;">
+                <h1 class="title">🌲 Pixel Math Legends 🌲</h1>
+                <p class="subtitle">ป่าแห่งอนันต์</p>
+                <button class="btn" onclick="game.showCharacterSelect()">🎮 เริ่มผจญภัย</button>
+                <button class="btn btn-secondary" onclick="game.showUpgradeShop()">⬆️ อัพเกรดตัวละคร</button>
+                <button class="btn btn-secondary" onclick="game.showInstructions()">📖 วิธีเล่น</button>
+            </div>
+        </div>
+
+        <!-- Character Selection -->
+        <div class="screen" id="character-select">
+            <h2 class="title">เลือกตัวละครของคุณ</h2>
+            <div class="character-grid" id="character-grid"></div>
+            <button class="btn" onclick="game.startGame()">เริ่มเกม!</button>
+            <button class="btn btn-secondary btn-small" onclick="game.showMainMenu()">กลับ</button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="screen" id="instructions">
+            <div class="menu-content">
+                <h2 class="menu-title">📖 วิธีเล่น</h2>
+                <div style="color: #fff; text-align: left; line-height: 1.8; font-size: 14px;">
+                    <p>🎯 <strong>เป้าหมาย:</strong> เอาชนะบอสและตอบโจทย์คณิตศาสตร์!</p>
+                    <p>⚔️ <strong>การต่อสู้:</strong> ตอบคำถามถูกต้องเพื่อโจมตีศัตรู</p>
+                    <p>🔥 <strong>คอมโบ:</strong> ตอบถูก 3 ข้อติด = สกิลพิเศษ!</p>
+                    <p>⭐ <strong>เลเวลอัพ:</strong> รับ EXP เพื่อปลดล็อคตัวละครใหม่</p>
+                    <p>💪 <strong>อัพเกรด:</strong> ใช้คะแนนเพิ่มพลังโจมตีและ HP</p>
+                    <p>🎮 <strong>เคล็ดลับ:</strong> บอสจะแข็งแกร่งขึ้นทุกเฟส!</p>
+                </div>
+                <button class="btn" onclick="game.hideInstructions()">เข้าใจแล้ว!</button>
+            </div>
+        </div>
+
+        <!-- Upgrade Shop -->
+        <div class="screen" id="upgrade-shop">
+            <h2 class="title">⬆️ ร้านอัพเกรด</h2>
+            <div style="color: #ffd700; font-size: 18px; margin-bottom: 20px;">
+                💰 คะแนนของคุณ: <span id="shop-score">0</span>
+            </div>
+            <div class="upgrade-grid" id="upgrade-grid"></div>
+            <button class="btn btn-secondary" onclick="game.hideUpgradeShop()">กลับ</button>
+        </div>
+
+        <!-- Pause Menu -->
+        <div class="screen pause-menu" id="pause-menu">
+            <div class="menu-content">
+                <h2 class="menu-title">⏸️ หยุดชั่วคราว</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pause-level">1</div>
+                        <div class="stat-name">เลเวล</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pause-score">0</div>
+                        <div class="stat-name">คะแนน</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pause-combo">0</div>
+                        <div class="stat-name">คอมโบสูงสุด</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pause-correct">0</div>
+                        <div class="stat-name">ตอบถูก</div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="game.resumeGame()">▶️ เล่นต่อ</button>
+                <button class="btn btn-secondary" onclick="game.returnToMenu()">🏠 กลับเมนูหลัก</button>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div class="screen" id="game-over">
+            <div class="menu-content">
+                <h2 class="menu-title">💀 จบเกม!</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-level">1</div>
+                        <div class="stat-name">เลเวลสูงสุด</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-score">0</div>
+                        <div class="stat-name">คะแนนรวม</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-combo">0</div>
+                        <div class="stat-name">คอมโบสูงสุด</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-correct">0</div>
+                        <div class="stat-name">ตอบถูกทั้งหมด</div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="game.restartGame()">🔄 เล่นใหม่</button>
+                <button class="btn btn-secondary" onclick="game.returnToMenu()">🏠 กลับเมนูหลัก</button>
+            </div>
+        </div>
+
+        <!-- Victory -->
+        <div class="screen" id="victory">
+            <div class="menu-content">
+                <h2 class="menu-title">🏆 ชนะแล้ว!</h2>
+                <p style="color: #ffd700; font-size: 18px; text-align: center; margin-bottom: 20px;">
+                    คุณเอาชนะบอสได้สำเร็จ!
+                </p>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="victory-level">1</div>
+                        <div class="stat-name">เลเวลสุดท้าย</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="victory-score">0</div>
+                        <div class="stat-name">คะแนนรวม</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="victory-combo">0</div>
+                        <div class="stat-name">คอมโบสูงสุด</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="victory-correct">0</div>
+                        <div class="stat-name">ตอบถูกทั้งหมด</div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="game.continueAdventure()">⚔️ ต่อสู้บอสต่อไป</button>
+                <button class="btn btn-secondary" onclick="game.returnToMenu()">🏠 กลับเมนูหลัก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== AUDIO SYSTEM ====================
+        class AudioSystem {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.sounds = {};
+                this.masterVolume = 0.3;
+            }
+
+            init() {
+                // Resume audio context on user interaction
+                document.addEventListener('click', () => {
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                }, { once: true });
+            }
+
+            playTone(frequency, duration, type = 'sine', volume = 0.5) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.frequency.value = frequency;
+                osc.type = type;
+                gain.gain.value = volume * this.masterVolume;
+                
+                osc.start(this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.stop(this.ctx.currentTime + duration);
+            }
+
+            playCorrect() {
+                this.playTone(800, 0.1, 'sine', 0.3);
+                setTimeout(() => this.playTone(1000, 0.15, 'sine', 0.3), 50);
+            }
+
+            playWrong() {
+                this.playTone(200, 0.2, 'sawtooth', 0.4);
+            }
+
+            playHit() {
+                this.playTone(150, 0.1, 'square', 0.5);
+            }
+
+            playSkill() {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        this.playTone(400 + i * 200, 0.1, 'sine', 0.3);
+                    }, i * 50);
+                }
+            }
+
+            playLevelUp() {
+                const notes = [523, 587, 659, 784, 880];
+                notes.forEach((note, i) => {
+                    setTimeout(() => this.playTone(note, 0.15, 'sine', 0.4), i * 100);
+                });
+            }
+
+            playVictory() {
+                const melody = [523, 587, 659, 784, 880, 1047];
+                melody.forEach((note, i) => {
+                    setTimeout(() => this.playTone(note, 0.2, 'sine', 0.4), i * 150);
+                });
+            }
+
+            playDefeat() {
+                const notes = [400, 350, 300, 250, 200];
+                notes.forEach((note, i) => {
+                    setTimeout(() => this.playTone(note, 0.2, 'sawtooth', 0.3), i * 100);
+                });
+            }
+        }
+
+        // ==================== GAME CORE ====================
+        class Game {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.audio = new AudioSystem();
+                
+                this.width = 800;
+                this.height = 450;
+                this.setupCanvas();
+                
+                this.state = 'menu'; // menu, playing, paused, gameover, victory
+                this.isPaused = false;
+                
+                // Game data
+                this.characters = [
+                    { id: 0, name: '🐱 แมวน้อย', emoji: '🐱', unlockLevel: 0, attack: 10, hp: 100 },
+                    { id: 1, name: '🐰 กระต่าย', emoji: '🐰', unlockLevel: 3, attack: 12, hp: 90 },
+                    { id: 2, name: '🦊 สุนัขจิ้งจอก', emoji: '🦊', unlockLevel: 5, attack: 15, hp: 85 },
+                    { id: 3, name: '🐻 หมีน้อย', emoji: '🐻', unlockLevel: 8, attack: 18, hp: 120 },
+                    { id: 4, name: '🦁 สิงโต', emoji: '🦁', unlockLevel: 10, attack: 22, hp: 110 },
+                    { id: 5, name: '🐉 มังกร', emoji: '🐉', unlockLevel: 15, attack: 30, hp: 150 }
+                ];
+                
+                this.selectedCharacter = 0;
+                
+                // Player stats
+                this.player = {
+                    hp: 100,
+                    maxHp: 100,
+                    attack: 10,
+                    level: 1,
+                    exp: 0,
+                    maxExp: 100,
+                    combo: 0,
+                    maxCombo: 0,
+                    score: 0,
+                    correctAnswers: 0,
+                    totalAttack: 10,
+                    totalHp: 100,
+                    x: 100,
+                    y: 200,
+                    animFrame: 0,
+                    facing: 1
+                };
+                
+                // Boss
+                this.boss = {
+                    hp: 200,
+                    maxHp: 200,
+                    attack: 15,
+                    level: 1,
+                    phase: 1,
+                    x: 600,
+                    y: 200,
+                    animFrame: 0,
+                    difficulty: 1,
+                    emoji: '👹'
+                };
+                
+                // Question system
+                this.currentQuestion = null;
+                this.questionActive = false;
+                this.answers = [];
+                
+                // Upgrades
+                this.upgrades = {
+                    attack: { level: 0, cost: 100, increment: 5 },
+                    hp: { level: 0, cost: 100, increment: 20 },
+                    expBoost: { level: 0, cost: 150, increment: 0.1 }
+                };
+                
+                // Animation
+                this.particles = [];
+                this.damageTexts = [];
+                this.animationFrame = 0;
+                this.lastTime = 0;
+                
+                // Background layers
+                this.bgLayers = [
+                    { x: 0, speed: 0.2, color: '#1a4d2e' },
+                    { x: 0, speed: 0.5, color: '#2d5f3f' },
+                    { x: 0, speed: 1, color: '#3d7350' }
+                ];
+                
+                this.init();
+            }
+
+            setupCanvas() {
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+                window.addEventListener('resize', () => this.handleResize());
+                this.handleResize();
+            }
+
+            handleResize() {
+                const container = document.getElementById('game-container');
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+                const scale = Math.min(containerWidth / this.width, containerHeight / this.height);
+                
+                this.canvas.style.width = `${this.width * scale}px`;
+                this.canvas.style.height = `${this.height * scale}px`;
+            }
+
+            init() {
+                this.audio.init();
+                this.loadGameData();
+                this.renderCharacterSelect();
+                this.renderUpgradeShop();
+                this.setupEventListeners();
+                this.gameLoop();
+            }
+
+            setupEventListeners() {
+                // Pause with ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.state === 'playing' && !this.isPaused) {
+                        this.pauseGame();
+                    }
+                });
+
+                // Prevent context menu on canvas
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+
+            // ==================== GAME STATE ====================
+            showMainMenu() {
+                this.state = 'menu';
+                this.hideAllScreens();
+                document.getElementById('main-menu').classList.add('active');
+                document.getElementById('hud').classList.remove('active');
+            }
+
+            showCharacterSelect() {
+                this.hideAllScreens();
+                document.getElementById('character-select').classList.add('active');
+            }
+
+            showInstructions() {
+                document.getElementById('instructions').classList.add('active');
+            }
+
+            hideInstructions() {
+                document.getElementById('instructions').classList.remove('active');
+            }
+
+            showUpgradeShop() {
+                this.hideAllScreens();
+                document.getElementById('upgrade-shop').classList.add('active');
+                document.getElementById('shop-score').textContent = this.player.score;
+                this.renderUpgradeShop();
+            }
+
+            hideUpgradeShop() {
+                document.getElementById('upgrade-shop').classList.remove('active');
+                this.showMainMenu();
+            }
+
+            hideAllScreens() {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+            }
+
+            startGame() {
+                this.state = 'playing';
+                this.isPaused = false;
+                this.hideAllScreens();
+                
+                // Reset player stats based on selected character
+                const char = this.characters[this.selectedCharacter];
+                this.player.maxHp = char.hp + this.upgrades.hp.level * this.upgrades.hp.increment;
+                this.player.hp = this.player.maxHp;
+                this.player.attack = char.attack + this.upgrades.attack.level * this.upgrades.attack.increment;
+                this.player.totalAttack = this.player.attack;
+                this.player.totalHp = this.player.maxHp;
+                this.player.combo = 0;
+                
+                // Reset boss
+                this.boss.level = 1;
+                this.boss.phase = 1;
+                this.boss.maxHp = 200;
+                this.boss.hp = this.boss.maxHp;
+                this.boss.attack = 15;
+                this.boss.difficulty = 1;
+                this.boss.emoji = '👹';
+                
+                document.getElementById('hud').classList.add('active');
+                this.updateHUD();
+                this.generateQuestion();
+            }
+
+            pauseGame() {
+                if (this.state !== 'playing') return;
+                this.isPaused = true;
+                document.getElementById('pause-menu').classList.add('active');
+                document.getElementById('pause-level').textContent = this.player.level;
+                document.getElementById('pause-score').textContent = this.player.score;
+                document.getElementById('pause-combo').textContent = this.player.maxCombo;
+                document.getElementById('pause-correct').textContent = this.player.correctAnswers;
+            }
+
+            resumeGame() {
+                this.isPaused = false;
+                document.getElementById('pause-menu').classList.remove('active');
+            }
+
+            returnToMenu() {
+                this.saveGameData();
+                this.showMainMenu();
+            }
+
+            restartGame() {
+                this.hideAllScreens();
+                this.startGame();
+            }
+
+            continueAdventure() {
+                this.boss.level++;
+                this.boss.phase = 1;
+                this.boss.difficulty += 0.5;
+                this.boss.maxHp = Math.floor(200 * (1 + this.boss.level * 0.5));
+                this.boss.hp = this.boss.maxHp;
+                this.boss.attack = Math.floor(15 * (1 + this.boss.level * 0.3));
+                
+                // Harder bosses
+                const bossEmojis = ['👹', '👺', '💀', '👻', '🧟', '🤖', '👾', '🐉', '🦈', '🦖'];
+                this.boss.emoji = bossEmojis[Math.min(this.boss.level - 1, bossEmojis.length - 1)];
+                
+                document.getElementById('victory').classList.remove('active');
+                this.state = 'playing';
+                this.generateQuestion();
+            }
+
+            gameOver() {
+                this.state = 'gameover';
+                this.audio.playDefeat();
+                this.saveGameData();
+                
+                document.getElementById('hud').classList.remove('active');
+                document.getElementById('game-over').classList.add('active');
+                document.getElementById('final-level').textContent = this.player.level;
+                document.getElementById('final-score').textContent = this.player.score;
+                document.getElementById('final-combo').textContent = this.player.maxCombo;
+                document.getElementById('final-correct').textContent = this.player.correctAnswers;
+            }
+
+            victory() {
+                this.state = 'victory';
+                this.audio.playVictory();
+                this.saveGameData();
+                
+                document.getElementById('hud').classList.remove('active');
+                document.getElementById('victory').classList.add('active');
+                document.getElementById('victory-level').textContent = this.player.level;
+                document.getElementById('victory-score').textContent = this.player.score;
+                document.getElementById('victory-combo').textContent = this.player.maxCombo;
+                document.getElementById('victory-correct').textContent = this.player.correctAnswers;
+            }
+
+            // ==================== QUESTION SYSTEM ====================
+            generateQuestion() {
+                this.questionActive = true;
+                const difficulty = Math.max(1, this.player.level + this.boss.difficulty);
+                
+                let num1, num2, operation, question, correctAnswer;
+                
+                const operations = ['+', '-', '×', '÷'];
+                const opWeights = difficulty > 5 ? operations : ['+', '-'];
+                operation = opWeights[Math.floor(Math.random() * opWeights.length)];
+                
+                const range = Math.min(50 + difficulty * 10, 200);
+                
+                switch(operation) {
+                    case '+':
+                        num1 = Math.floor(Math.random() * range) + 1;
+                        num2 = Math.floor(Math.random() * range) + 1;
+                        correctAnswer = num1 + num2;
+                        question = `${num1} + ${num2}`;
+                        break;
+                    case '-':
+                        num1 = Math.floor(Math.random() * range) + 10;
+                        num2 = Math.floor(Math.random() * num1);
+                        correctAnswer = num1 - num2;
+                        question = `${num1} - ${num2}`;
+                        break;
+                    case '×':
+                        num1 = Math.floor(Math.random() * 15) + 2;
+                        num2 = Math.floor(Math.random() * 15) + 2;
+                        correctAnswer = num1 * num2;
+                        question = `${num1} × ${num2}`;
+                        break;
+                    case '÷':
+                        num2 = Math.floor(Math.random() * 10) + 2;
+                        correctAnswer = Math.floor(Math.random() * 15) + 1;
+                        num1 = num2 * correctAnswer;
+                        question = `${num1} ÷ ${num2}`;
+                        break;
+                }
+                
+                this.currentQuestion = {
+                    question: question,
+                    correctAnswer: correctAnswer,
+                    operation: operation
+                };
+                
+                // Generate answers
+                this.answers = [correctAnswer];
+                while (this.answers.length < 4) {
+                    let wrongAnswer;
+                    if (operation === '÷') {
+                        wrongAnswer = correctAnswer + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
+                    } else {
+                        const offset = Math.floor(Math.random() * 20) + 1;
+                        wrongAnswer = correctAnswer + (Math.random() > 0.5 ? offset : -offset);
+                    }
+                    
+                    if (wrongAnswer > 0 && !this.answers.includes(wrongAnswer)) {
+                        this.answers.push(wrongAnswer);
+                    }
+                }
+                
+                // Shuffle answers
+                this.answers.sort(() => Math.random() - 0.5);
+                
+                // Display question
+                const questionDisplay = document.getElementById('question-display');
+                questionDisplay.textContent = question + ' = ?';
+                questionDisplay.classList.add('active');
+                
+                // Display answer buttons
+                const answerContainer = document.getElementById('answer-container');
+                answerContainer.innerHTML = '';
+                answerContainer.classList.add('active');
+                
+                this.answers.forEach((answer, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'answer-btn';
+                    btn.textContent = answer;
+                    btn.onclick = () => this.checkAnswer(answer, btn);
+                    answerContainer.appendChild(btn);
+                });
+            }
+
+            checkAnswer(answer, btn) {
+                if (!this.questionActive) return;
+                
+                this.questionActive = false;
+                const correct = answer === this.currentQuestion.correctAnswer;
+                
+                // Disable all buttons
+                document.querySelectorAll('.answer-btn').forEach(b => {
+                    b.style.pointerEvents = 'none';
+                });
+                
+                if (correct) {
+                    btn.classList.add('correct');
+                    this.audio.playCorrect();
+                    this.handleCorrectAnswer();
+                } else {
+                    btn.classList.add('wrong');
+                    this.audio.playWrong();
+                    this.handleWrongAnswer();
+                }
+                
+                setTimeout(() => {
+                    document.getElementById('question-display').classList.remove('active');
+                    document.getElementById('answer-container').classList.remove('active');
+                    
+                    if (this.state === 'playing' && !this.isPaused) {
+                        setTimeout(() => this.generateQuestion(), 1000);
+                    }
+                }, 1000);
+            }
+
+            handleCorrectAnswer() {
+                this.player.correctAnswers++;
+                this.player.combo++;
+                
+                if (this.player.combo > this.player.maxCombo) {
+                    this.player.maxCombo = this.player.combo;
+                }
+                
+                // Calculate damage
+                let damage = this.player.attack;
+                
+                // Combo bonus
+                if (this.player.combo >= 3) {
+                    damage *= 2;
+                    this.audio.playSkill();
+                    this.createParticles(this.boss.x, this.boss.y, '#ffd700', 20);
+                    this.showFloatingText(this.boss.x, this.boss.y - 50, 'COMBO SKILL!', '#ffd700');
+                }
+                
+                // Deal damage to boss
+                this.boss.hp -= damage;
+                this.audio.playHit();
+                this.createParticles(this.boss.x, this.boss.y, '#ff0000', 10);
+                this.showFloatingText(this.boss.x, this.boss.y, `-${damage}`, '#ff0000');
+                
+                // Gain EXP and score
+                const expGain = Math.floor(10 * (1 + this.upgrades.expBoost.level * this.upgrades.expBoost.increment));
+                this.player.exp += expGain;
+                this.player.score += Math.floor(10 * (1 + this.player.combo * 0.5));
+                
+                // Level up check
+                if (this.player.exp >= this.player.maxExp) {
+                    this.levelUp();
+                }
+                
+                // Boss defeated
+                if (this.boss.hp <= 0) {
+                    this.boss.hp = 0;
+                    this.victory();
+                } else {
+                    // Boss phase transition
+                    const hpPercent = this.boss.hp / this.boss.maxHp;
+                    if (hpPercent <= 0.5 && this.boss.phase === 1) {
+                        this.boss.phase = 2;
+                        this.boss.attack *= 1.5;
+                        this.showFloatingText(this.boss.x, this.boss.y - 60, 'เฟส 2!', '#ff00ff');
+                    } else if (hpPercent <= 0.25 && this.boss.phase === 2) {
+                        this.boss.phase = 3;
+                        this.boss.attack *= 1.5;
+                        this.showFloatingText(this.boss.x, this.boss.y - 60, 'เฟส 3!', '#ff0000');
+                    }
+                }
+                
+                this.updateHUD();
+            }
+
+            handleWrongAnswer() {
+                this.player.combo = 0;
+                
+                // Take damage
+                const damage = Math.floor(this.boss.attack);
+                this.player.hp -= damage;
+                this.createParticles(this.player.x, this.player.y, '#ff0000', 10);
+                this.showFloatingText(this.player.x, this.player.y, `-${damage}`, '#ff0000');
+                
+                if (this.player.hp <= 0) {
+                    this.player.hp = 0;
+                    this.gameOver();
+                }
+                
+                this.updateHUD();
+            }
+
+            levelUp() {
+                this.player.level++;
+                this.player.exp = 0;
+                this.player.maxExp = Math.floor(100 * Math.pow(1.5, this.player.level - 1));
+                
+                // Stat increases
+                this.player.maxHp += 10;
+                this.player.hp = this.player.maxHp;
+                this.player.attack += 2;
+                
+                this.audio.playLevelUp();
+                this.createParticles(this.player.x, this.player.y, '#ffd700', 30);
+                this.showFloatingText(this.player.x, this.player.y - 60, 'LEVEL UP!', '#ffd700');
+                
+                this.updateHUD();
+            }
+
+            // ==================== UI UPDATES ====================
+            updateHUD() {
+                // HP
+                document.getElementById('hp-text').textContent = `${this.player.hp}/${this.player.maxHp}`;
+                document.getElementById('hp-bar').style.width = `${(this.player.hp / this.player.maxHp) * 100}%`;
+                
+                // EXP
+                document.getElementById('exp-text').textContent = `${this.player.exp}/${this.player.maxExp}`;
+                document.getElementById('exp-bar').style.width = `${(this.player.exp / this.player.maxExp) * 100}%`;
+                
+                // Combo
+                document.getElementById('combo-text').textContent = this.player.combo;
+                const comboPercent = Math.min((this.player.combo / 3) * 100, 100);
+                document.getElementById('combo-bar').style.width = `${comboPercent}%`;
+                
+                // Level & Score
+                document.getElementById('level-text').textContent = this.player.level;
+                document.getElementById('score-text').textContent = this.player.score;
+                
+                // Combo indicator
+                const comboIndicator = document.getElementById('combo-indicator');
+                if (this.player.combo >= 3) {
+                    comboIndicator.classList.add('active');
+                    document.getElementById('combo-count').textContent = this.player.combo;
+                } else {
+                    comboIndicator.classList.remove('active');
+                }
+            }
+
+            renderCharacterSelect() {
+                const grid = document.getElementById('character-grid');
+                grid.innerHTML = '';
+                
+                this.characters.forEach(char => {
+                    const card = document.createElement('div');
+                    card.className = 'character-card';
+                    
+                    const unlocked = this.player.level >= char.unlockLevel;
+                    if (!unlocked) card.classList.add('locked');
+                    if (this.selectedCharacter === char.id) card.classList.add('selected');
+                    
+                    card.innerHTML = `
+                        <div class="character-icon">${char.emoji}</div>
+                        <div class="character-name">${char.name}</div>
+                        <div class="character-level">
+                            ${unlocked ? `⚔️ ${char.attack} | ❤️ ${char.hp}` : `🔒 เลเวล ${char.unlockLevel}`}
+                        </div>
+                    `;
+                    
+                    if (unlocked) {
+                        card.onclick = () => {
+                            this.selectedCharacter = char.id;
+                            this.renderCharacterSelect();
+                        };
+                    }
+                    
+                    grid.appendChild(card);
+                });
+            }
+
+            renderUpgradeShop() {
+                const grid = document.getElementById('upgrade-grid');
+                grid.innerHTML = '';
+                
+                const upgrades = [
+                    {
+                        id: 'attack',
+                        icon: '⚔️',
+                        name: 'พลังโจมตี',
+                        desc: `+${this.upgrades.attack.increment} โจมตี`,
+                        cost: Math.floor(this.upgrades.attack.cost * Math.pow(1.5, this.upgrades.attack.level)),
+                        level: this.upgrades.attack.level
+                    },
+                    {
+                        id: 'hp',
+                        icon: '❤️',
+                        name: 'พลังชีวิต',
+                        desc: `+${this.upgrades.hp.increment} HP`,
+                        cost: Math.floor(this.upgrades.hp.cost * Math.pow(1.5, this.upgrades.hp.level)),
+                        level: this.upgrades.hp.level
+                    },
+                    {
+                        id: 'expBoost',
+                        icon: '✨',
+                        name: 'EXP Boost',
+                        desc: `+${(this.upgrades.expBoost.increment * 100).toFixed(0)}% EXP`,
+                        cost: Math.floor(this.upgrades.expBoost.cost * Math.pow(1.5, this.upgrades.expBoost.level)),
+                        level: this.upgrades.expBoost.level
+                    }
+                ];
+                
+                upgrades.forEach(upgrade => {
+                    const card = document.createElement('div');
+                    card.className = 'upgrade-card';
+                    
+                    card.innerHTML = `
+                        <div class="upgrade-icon">${upgrade.icon}</div>
+                        <div class="upgrade-name">${upgrade.name}</div>
+                        <div class="upgrade-level">เลเวล ${upgrade.level}</div>
+                        <div class="upgrade-cost">💰 ${upgrade.cost}</div>
+                        <button class="btn btn-small btn-success" ${this.player.score < upgrade.cost ? 'disabled' : ''}>
+                            อัพเกรด
+                        </button>
+                    `;
+                    
+                    const btn = card.querySelector('button');
+                    btn.onclick = () => this.purchaseUpgrade(upgrade.id);
+                    
+                    grid.appendChild(card);
+                });
+            }
+
+            purchaseUpgrade(upgradeId) {
+                const upgrade = this.upgrades[upgradeId];
+                const cost = Math.floor(upgrade.cost * Math.pow(1.5, upgrade.level));
+                
+                if (this.player.score >= cost) {
+                    this.player.score -= cost;
+                    upgrade.level++;
+                    
+                    // Apply upgrades
+                    if (upgradeId === 'attack') {
+                        this.player.totalAttack += upgrade.increment;
+                    } else if (upgradeId === 'hp') {
+                        this.player.totalHp += upgrade.increment;
+                    }
+                    
+                    this.audio.playCorrect();
+                    document.getElementById('shop-score').textContent = this.player.score;
+                    this.renderUpgradeShop();
+                    this.saveGameData();
+                }
+            }
+
+            // ==================== VISUAL EFFECTS ====================
+            createParticles(x, y, color, count) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 5,
+                        vy: (Math.random() - 0.5) * 5,
+                        color: color,
+                        life: 30,
+                        maxLife: 30
+                    });
+                }
+            }
+
+            showFloatingText(x, y, text, color) {
+                this.damageTexts.push({
+                    x: x,
+                    y: y,
+                    text: text,
+                    color: color,
+                    life: 60,
+                    maxLife: 60
+                });
+            }
+
+            // ==================== RENDERING ====================
+            gameLoop(timestamp = 0) {
+                requestAnimationFrame((t) => this.gameLoop(t));
+                
+                const deltaTime = timestamp - this.lastTime;
+                this.lastTime = timestamp;
+                
+                if (!this.isPaused && this.state === 'playing') {
+                    this.update(deltaTime);
+                }
+                
+                this.render();
+            }
+
+            update(deltaTime) {
+                this.animationFrame++;
+                
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.2; // gravity
+                    p.life--;
+                    return p.life > 0;
+                });
+                
+                // Update damage texts
+                this.damageTexts = this.damageTexts.filter(t => {
+                    t.y -= 1;
+                    t.life--;
+                    return t.life > 0;
+                });
+                
+                // Animate characters
+                if (this.animationFrame % 15 === 0) {
+                    this.player.animFrame = (this.player.animFrame + 1) % 2;
+                    this.boss.animFrame = (this.boss.animFrame + 1) % 2;
+                }
+                
+                // Parallax background
+                this.bgLayers.forEach(layer => {
+                    layer.x -= layer.speed;
+                    if (layer.x <= -this.width) layer.x = 0;
+                });
+            }
+
+            render() {
+                const ctx = this.ctx;
+                
+                // Clear
+                ctx.fillStyle = '#16213e';
+                ctx.fillRect(0, 0, this.width, this.height);
+                
+                if (this.state === 'playing' || this.state === 'victory') {
+                    this.renderGame(ctx);
+                }
+            }
+
+            renderGame(ctx) {
+                // Parallax background layers
+                this.bgLayers.forEach((layer, i) => {
+                    ctx.fillStyle = layer.color;
+                    ctx.globalAlpha = 0.3 - i * 0.1;
+                    
+                    // Draw trees pattern
+                    for (let x = layer.x; x < this.width + 100; x += 80) {
+                        this.drawTree(ctx, x, this.height - 150 + i * 30, 40 - i * 10);
+                    }
+                    for (let x = layer.x - this.width; x < this.width + 100; x += 80) {
+                        this.drawTree(ctx, x, this.height - 150 + i * 30, 40 - i * 10);
+                    }
+                });
+                ctx.globalAlpha = 1;
+                
+                // Ground
+                ctx.fillStyle = '#2d5f3f';
+                ctx.fillRect(0, this.height - 100, this.width, 100);
+                
+                // Grass details
+                ctx.fillStyle = '#3d7350';
+                for (let x = 0; x < this.width; x += 20) {
+                    ctx.fillRect(x, this.height - 100, 10, 5);
+                }
+                
+                // Player
+                this.drawCharacter(ctx, this.player.x, this.player.y, 
+                    this.characters[this.selectedCharacter].emoji, this.player.animFrame);
+                
+                // Boss
+                this.drawBoss(ctx, this.boss.x, this.boss.y, this.boss.emoji, this.boss.animFrame);
+                
+                // Boss HP bar
+                this.drawBossHPBar(ctx);
+                
+                // Particles
+                this.particles.forEach(p => {
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life / p.maxLife;
+                    ctx.fillRect(p.x, p.y, 4, 4);
+                });
+                ctx.globalAlpha = 1;
+                
+                // Damage texts
+                this.damageTexts.forEach(t => {
+                    ctx.fillStyle = t.color;
+                    ctx.globalAlpha = t.life / t.maxLife;
+                    ctx.font = 'bold 24px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(t.text, t.x, t.y);
+                });
+                ctx.globalAlpha = 1;
+            }
+
+            drawTree(ctx, x, y, height) {
+                // Trunk
+                ctx.fillStyle = '#4a2c2a';
+                ctx.fillRect(x - 5, y, 10, height);
+                
+                // Foliage
+                ctx.fillStyle = '#2d5f3f';
+                ctx.beginPath();
+                ctx.arc(x, y - 10, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x - 15, y, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x + 15, y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawCharacter(ctx, x, y, emoji, frame) {
+                const offset = frame === 0 ? 0 : -3;
+                ctx.font = '64px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(emoji, x, y + offset);
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(x, y + 40, 20, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawBoss(ctx, x, y, emoji, frame) {
+                const offset = frame === 0 ? 0 : -3;
+                
+                // Phase glow
+                if (this.boss.phase === 2) {
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 60, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.boss.phase === 3) {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 70, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.font = '80px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(emoji, x, y + offset);
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(x, y + 50, 30, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawBossHPBar(ctx) {
+                const barWidth = 300;
+                const barHeight = 30;
+                const x = (this.width - barWidth) / 2;
+                const y = 30;
+                
+                // Background
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(x - 5, y - 5, barWidth + 10, barHeight + 10);
+                
+                // Border
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, barWidth, barHeight);
+                
+                // HP fill
+                const hpPercent = this.boss.hp / this.boss.maxHp;
+                const fillWidth = barWidth * hpPercent;
+                
+                let gradient = ctx.createLinearGradient(x, y, x + fillWidth, y);
+                if (this.boss.phase === 3) {
+                    gradient.addColorStop(0, '#ff0000');
+                    gradient.addColorStop(1, '#ff6666');
+                } else if (this.boss.phase === 2) {
+                    gradient.addColorStop(0, '#ff00ff');
+                    gradient.addColorStop(1, '#ff66ff');
+                } else {
+                    gradient.addColorStop(0, '#e94560');
+                    gradient.addColorStop(1, '#ff6b81');
+                }
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, fillWidth, barHeight);
+                
+                // Text
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 16px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`Boss Lv.${this.boss.level} - ${this.boss.hp}/${this.boss.maxHp}`, 
+                    x + barWidth / 2, y + barHeight / 2);
+                
+                // Phase indicator
+                if (this.boss.phase > 1) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.font = 'bold 14px monospace';
+                    ctx.fillText(`เฟส ${this.boss.phase}`, x + barWidth / 2, y + barHeight + 15);
+                }
+            }
+
+            // ==================== DATA PERSISTENCE ====================
+            saveGameData() {
+                const data = {
+                    player: {
+                        level: this.player.level,
+                        score: this.player.score,
+                        maxCombo: this.player.maxCombo,
+                        correctAnswers: this.player.correctAnswers,
+                        totalAttack: this.player.totalAttack,
+                        totalHp: this.player.totalHp
+                    },
+                    upgrades: this.upgrades,
+                    selectedCharacter: this.selectedCharacter
+                };
+                
+                localStorage.setItem('pixelMathLegends', JSON.stringify(data));
+            }
+
+            loadGameData() {
+                const saved = localStorage.getItem('pixelMathLegends');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        
+                        this.player.level = data.player.level || 1;
+                        this.player.score = data.player.score || 0;
+                        this.player.maxCombo = data.player.maxCombo || 0;
+                        this.player.correctAnswers = data.player.correctAnswers || 0;
+                        this.player.totalAttack = data.player.totalAttack || 10;
+                        this.player.totalHp = data.player.totalHp || 100;
+                        
+                        if (data.upgrades) {
+                            this.upgrades = data.upgrades;
+                        }
+                        
+                        this.selectedCharacter = data.selectedCharacter || 0;
+                    } catch (e) {
+                        console.error('Failed to load game data:', e);
+                    }
+                }
+            }
+        }
+
+        // Initialize game
+        const game = new Game();
+    </script>
+</body>
+</html>
