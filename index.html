@@ -259,7 +259,7 @@
                 <button class="hud-item icon-btn" onclick="app.toggleSettings(true)" style="background: transparent; border-color: var(--neon-gold); font-size: 1.2rem;">⚙️</button>
             </div>
             <div class="mode-grid" id="mode-grid-container"></div>
-            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">แตะเพื่อเปิดประสบการณ์เต็มหน้าจอ</p>
+            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">แตะตรงไหนก็ได้เพื่อเริ่มประสบการณ์เต็มหน้าจอ</p>
         </div>
     </div>
 
@@ -317,7 +317,6 @@ class SoundManager {
         this.bgGain = null;
         this.sfxGain = null;
         this.isPlayingMusic = false;
-        // ปรับจูนพื้นฐานให้ดังขึ้น
         this.musicVol = 0.2; 
         this.sfxVol = 0.7;
     }
@@ -351,7 +350,6 @@ class SoundManager {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
             g.gain.setValueAtTime(0, this.ctx.currentTime);
-            // เพิ่มความดังของ Pad Synth ในระดับ Master
             g.gain.linearRampToValueAtTime(0.5, this.ctx.currentTime + 2);
             g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 6);
             osc.connect(g);
@@ -366,7 +364,7 @@ class SoundManager {
         playPad(220, 4); 
     }
 
-    playSuccess() { this.beep(880, 'sine', 0.2, 0.3); } // เพิ่ม Vol พื้นฐาน
+    playSuccess() { this.beep(880, 'sine', 0.2, 0.3); }
     playFail() { this.beep(110, 'sawtooth', 0.4, 0.4); } 
     playCombo() { this.beep(1320, 'sine', 0.6, 0.5); }
     beep(freq, type, duration, vol) {
@@ -409,22 +407,36 @@ const app = {
         this.initSpaceBg();
         window.addEventListener('resize', () => this.resize());
         
-        const handleInteraction = () => {
+        // เพิ่ม Event สำหรับการแตะหรือคลิกเพื่อกระตุ้น Fullscreen ใน iPad/Tablet
+        const triggerFullscreen = () => {
             sfx.init();
             this.requestFullscreen();
         };
-        document.addEventListener('pointerdown', handleInteraction, { once: false });
+
+        // ใช้ Event pointerdown ซึ่งครอบคลุมทั้ง Mouse และ Touch
+        document.addEventListener('pointerdown', triggerFullscreen, { once: false });
         
         this.loop();
     },
 
     requestFullscreen() {
-        const doc = window.document;
-        const docEl = doc.documentElement;
-        const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile && requestFullScreen && !doc.fullscreenElement) {
-            requestFullScreen.call(docEl).catch(e => {});
+        // ตรวจสอบว่าอยู่ใน Fullscreen หรือยัง ถ้ายังให้ขอสิทธิ์
+        if (!document.fullscreenElement && 
+            !document.webkitFullscreenElement && 
+            !document.mozFullScreenElement && 
+            !document.msFullscreenElement) {
+            
+            const el = document.documentElement;
+            const request = el.requestFullscreen || 
+                          el.webkitRequestFullscreen || 
+                          el.mozRequestFullScreen || 
+                          el.msRequestFullscreen;
+            
+            if (request) {
+                request.call(el).catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            }
         }
     },
 
@@ -446,7 +458,6 @@ const app = {
     },
 
     updateVolume() {
-        // ปรับสูตรคำนวณใหม่ ให้ Music ดังได้สูงสุดที่ 0.5 (จากเดิม 0.1) และ SFX ดังสุดที่ 1.0
         const m = document.getElementById('vol-music').value / 200; 
         const s = document.getElementById('vol-sfx').value / 100;
         sfx.updateVolumes(m, s);
@@ -492,6 +503,7 @@ const app = {
             btn.onclick = (e) => { 
                 e.stopPropagation();
                 sfx.init(); 
+                this.requestFullscreen(); // บังคับขอ Fullscreen อีกครั้งเมื่อเลือกโหมด
                 this.start(m); 
             };
             container.appendChild(btn);
