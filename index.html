@@ -77,7 +77,6 @@
             100% { filter: hue-rotate(360deg) brightness(1.3); }
         }
 
-        /* UI Styling */
         .overlay {
             position: absolute; inset: 0;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -93,7 +92,7 @@
             border-radius: 30px;
             padding: 25px;
             text-align: center;
-            width: 95%; max-width: 850px;
+            width: 95%; max-width: 900px;
             box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
             max-height: 90dvh;
             overflow-y: auto;
@@ -119,7 +118,7 @@
 
         .mode-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
@@ -127,19 +126,29 @@
         .mode-btn {
             background: rgba(255, 255, 255, 0.06);
             color: white;
-            padding: 12px;
+            padding: 15px 10px;
             border-radius: 15px;
             border: 1px solid rgba(0, 242, 255, 0.2);
             cursor: pointer;
             transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 110px;
         }
         .mode-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--neon-blue); transform: translateY(-3px); }
+
+        .mode-name { font-weight: 700; font-size: 0.95rem; margin-top: 5px; color: #fff; }
+        .mode-desc { font-size: 0.65rem; color: var(--neon-blue); opacity: 0.9; margin-top: 4px; line-height: 1.2; }
 
         #hud {
             position: absolute; top: 0; left: 0; width: 100%;
             padding: 15px 25px; display: flex; justify-content: space-between;
             align-items: center; pointer-events: none; z-index: 1000;
         }
+
+        .hud-group { display: flex; gap: 8px; pointer-events: auto; }
 
         .hud-item { 
             background: rgba(0,0,0,0.7); 
@@ -148,6 +157,11 @@
             border: 1.5px solid var(--neon-blue); 
             font-weight: 700; color: white;
             font-size: 0.85rem;
+            display: flex; align-items: center;
+        }
+
+        .icon-btn {
+            width: 40px; height: 40px; padding: 0; justify-content: center; cursor: pointer;
         }
 
         #choice-container {
@@ -170,6 +184,26 @@
         }
         .choice-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--neon-blue); background: var(--neon-pink); }
 
+        /* Settings UI */
+        .settings-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 20px 0; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
+        }
+        .settings-label { font-weight: 600; color: var(--neon-blue); }
+        
+        input[type=range] {
+            -webkit-appearance: none; width: 60%; background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 4px;
+            border: 1px solid var(--neon-blue);
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 20px; width: 20px; border-radius: 50%; background: var(--neon-pink);
+            cursor: pointer; -webkit-appearance: none; margin-top: -7px; box-shadow: 0 0 10px var(--neon-pink);
+        }
+
         #orientation-overlay {
             position: fixed; inset: 0; background: #000; z-index: 10000;
             display: none; flex-direction: column; justify-content: center; align-items: center;
@@ -183,6 +217,7 @@
 <div id="orientation-overlay">
     <div style="font-size: 4rem;">📱🔄</div>
     <h2 style="margin-top: 20px;">กรุณาหมุนหน้าจอเป็นแนวนอน</h2>
+    <p>และแตะหน้าจอหนึ่งครั้งเพื่อเริ่มความสนุก!</p>
 </div>
 
 <div id="game-container">
@@ -194,15 +229,20 @@
     <canvas id="mathBgCanvas"></canvas>
     <canvas id="mainCanvas"></canvas>
 
+    <!-- HUD -->
     <div id="hud" class="hidden">
-        <div style="display: flex; gap: 8px;">
+        <div class="hud-group">
             <div class="hud-item">HP: <span id="hp-val">❤️❤️❤️❤️</span></div>
             <div class="hud-item">SCORE: <span id="score-val">0</span></div>
             <div class="hud-item" id="combo-hud" style="color: var(--neon-gold); display: none; border-color: var(--neon-gold);">COMBO: <span id="combo-val">0</span></div>
         </div>
-        <button class="hud-item" style="background: var(--neon-pink); cursor:pointer; pointer-events: auto; border-color: white;" onclick="location.reload()">HOME</button>
+        <div class="hud-group">
+            <button class="hud-item icon-btn" onclick="app.toggleSettings(true)" style="border-color: var(--neon-gold);">⚙️</button>
+            <button class="hud-item" style="background: var(--neon-pink); cursor:pointer; border-color: white;" onclick="location.reload()">HOME</button>
+        </div>
     </div>
 
+    <!-- Gameplay Choices -->
     <div id="choice-container" class="hidden">
         <button class="choice-btn" onpointerdown="app.submitChoice(0)">-</button>
         <button class="choice-btn" onpointerdown="app.submitChoice(1)">-</button>
@@ -210,14 +250,44 @@
         <button class="choice-btn" onpointerdown="app.submitChoice(3)">-</button>
     </div>
 
+    <!-- Main Menu -->
     <div id="menu-main" class="overlay">
         <div class="panel">
-            <h1 class="title">MATH MULTIVERSE</h1>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div style="width: 40px;"></div>
+                <h1 class="title">MATH MULTIVERSE</h1>
+                <button class="hud-item icon-btn" onclick="app.toggleSettings(true)" style="background: transparent; border-color: var(--neon-gold); font-size: 1.2rem;">⚙️</button>
+            </div>
             <div class="mode-grid" id="mode-grid-container"></div>
-            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">ยินดีต้อนรับสู่จักรวาลตัวเลข</p>
+            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">แตะเพื่อเปิดประสบการณ์เต็มหน้าจอ</p>
         </div>
     </div>
 
+    <!-- Settings Menu -->
+    <div id="menu-settings" class="overlay hidden">
+        <div class="panel" style="max-width: 500px;">
+            <h2 class="title" style="font-size: 2rem;">SETTINGS</h2>
+            
+            <div class="settings-row">
+                <span class="settings-label">เสียงดนตรี (Music)</span>
+                <input type="range" id="vol-music" min="0" max="100" value="50" oninput="app.updateVolume()">
+            </div>
+            
+            <div class="settings-row">
+                <span class="settings-label">เสียงเอฟเฟกต์ (SFX)</span>
+                <input type="range" id="vol-sfx" min="0" max="100" value="70" oninput="app.updateVolume()">
+            </div>
+
+            <div class="settings-row">
+                <span class="settings-label">ระบบสั่น (Vibration)</span>
+                <button id="vibrate-toggle" class="hud-item" onclick="app.toggleVibrate()" style="width: 100px; justify-content: center;">เปิด</button>
+            </div>
+
+            <button class="choice-btn" style="width: 100%; margin-top: 20px;" onclick="app.toggleSettings(false)">ปิด</button>
+        </div>
+    </div>
+
+    <!-- Game Over -->
     <div id="menu-result" class="overlay hidden">
         <div class="panel">
             <h1 class="title">GAME OVER</h1>
@@ -229,24 +299,76 @@
 
 <script>
 const MODES = [
-    { id: 'baby', name: 'เบบี๋', emoji: '🍼', range: 5, ops: ['+'], speedMul: 0.7 },
-    { id: 'v_easy', name: 'ง่ายมาก', emoji: '🌸', range: 10, ops: ['+', '-'], speedMul: 0.8 },
-    { id: 'kid', name: 'เด็กน้อย', emoji: '🐰', range: 15, ops: ['+', '-'], speedMul: 1.0 },
-    { id: 'hyper', name: 'ความเร็วแสง', emoji: '⚡', range: 20, ops: ['+', '-'], speedMul: 1.25, ramp: true },
-    { id: 'multi', name: 'เซียนคูณ', emoji: '⚔️', range: 12, ops: ['*'], speedMul: 0.9 },
-    { id: 'div', name: 'หารสายฟ้า', emoji: '⚡', range: 10, ops: ['/'], speedMul: 1.1 },
-    { id: 'sonic', name: 'โซนิค', emoji: '🚀', range: 25, ops: ['+', '-'], speedMul: 2.1 },
-    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 130 },
-    { id: 'titan', name: 'บอสใหญ่', emoji: '👺', range: 60, ops: ['+', '-', '*', '/'], speedMul: 1.6 },
-    { id: 'chill', name: 'ชิลๆ', emoji: '🎋', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
+    { id: 'baby', name: 'เบบี๋', emoji: '🍼', desc: 'บวกเลขง่ายๆ 1-5', range: 5, ops: ['+'], speedMul: 0.7 },
+    { id: 'v_easy', name: 'ง่ายมาก', emoji: '🌸', desc: 'บวก ลบ เลขหลักเดียว', range: 10, ops: ['+', '-'], speedMul: 0.8 },
+    { id: 'kid', name: 'เด็กน้อย', emoji: '🐰', desc: 'เลขพื้นฐาน 1-15', range: 15, ops: ['+', '-'], speedMul: 1.0 },
+    { id: 'hyper', name: 'ความเร็วแสง', emoji: '⚡', desc: 'เร็วขึ้นตามคะแนน', range: 20, ops: ['+', '-'], speedMul: 1.25, ramp: true },
+    { id: 'multi', name: 'เซียนคูณ', emoji: '⚔️', desc: 'สูตรคูณแม่ 2-12', range: 12, ops: ['*'], speedMul: 0.9 },
+    { id: 'div', name: 'หารสายฟ้า', emoji: '⚡', desc: 'ฝึกการหารเลขลงตัว', range: 10, ops: ['/'], speedMul: 1.1 },
+    { id: 'sonic', name: 'โซนิค', emoji: '🚀', desc: 'ความเร็วสูงสุดสำหรับโปร', range: 25, ops: ['+', '-'], speedMul: 2.1 },
+    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', desc: 'โจทย์จะหายไปอย่างรวดเร็ว!', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 120 },
+    { id: 'titan', name: 'บอสใหญ่', emoji: '👺', desc: 'จัดเต็มทุกเครื่องหมาย', range: 60, ops: ['+', '-', '*', '/'], speedMul: 1.6 },
+    { id: 'chill', name: 'ชิลๆ', emoji: '🎋', desc: 'บวกไปเรื่อยๆ อมตะ', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
 ];
 
 class SoundManager {
-    constructor() { this.ctx = null; }
-    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-    playSuccess() { this.beep(880, 'sine', 0.2, 0.08); }
-    playFail() { this.beep(110, 'sawtooth', 0.4, 0.12); }
-    playCombo() { this.beep(1320, 'sine', 0.6, 0.15); }
+    constructor() { 
+        this.ctx = null; 
+        this.bgGain = null;
+        this.sfxGain = null;
+        this.isPlayingMusic = false;
+        // ปรับจูนพื้นฐานให้ดังขึ้น
+        this.musicVol = 0.2; 
+        this.sfxVol = 0.7;
+    }
+    init() { 
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.bgGain = this.ctx.createGain();
+            this.sfxGain = this.ctx.createGain();
+            this.bgGain.connect(this.ctx.destination);
+            this.sfxGain.connect(this.ctx.destination);
+            this.updateVolumes(this.musicVol, this.sfxVol);
+            this.startAmbience();
+        } 
+    }
+    
+    updateVolumes(m, s) {
+        this.musicVol = m;
+        this.sfxVol = s;
+        if (this.bgGain) this.bgGain.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.1);
+        if (this.sfxGain) this.sfxGain.gain.setTargetAtTime(this.sfxVol, this.ctx.currentTime, 0.1);
+    }
+
+    startAmbience() {
+        if (this.isPlayingMusic) return;
+        this.isPlayingMusic = true;
+        
+        const playPad = (freq, delay) => {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            g.gain.setValueAtTime(0, this.ctx.currentTime);
+            // เพิ่มความดังของ Pad Synth ในระดับ Master
+            g.gain.linearRampToValueAtTime(0.5, this.ctx.currentTime + 2);
+            g.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 6);
+            osc.connect(g);
+            g.connect(this.bgGain);
+            osc.start(this.ctx.currentTime + delay);
+            osc.stop(this.ctx.currentTime + delay + 7);
+            setTimeout(() => playPad(freq, 0), 8000 + (Math.random() * 2000));
+        };
+        
+        playPad(110, 0); 
+        playPad(164.81, 2); 
+        playPad(220, 4); 
+    }
+
+    playSuccess() { this.beep(880, 'sine', 0.2, 0.3); } // เพิ่ม Vol พื้นฐาน
+    playFail() { this.beep(110, 'sawtooth', 0.4, 0.4); } 
+    playCombo() { this.beep(1320, 'sine', 0.6, 0.5); }
     beep(freq, type, duration, vol) {
         if (!this.ctx) return;
         try {
@@ -256,7 +378,7 @@ class SoundManager {
             osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
             g.gain.setValueAtTime(vol, this.ctx.currentTime);
             g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-            osc.connect(g); g.connect(this.ctx.destination);
+            osc.connect(g); g.connect(this.sfxGain);
             osc.start(); osc.stop(this.ctx.currentTime + duration);
         } catch(e){}
     }
@@ -266,7 +388,7 @@ const sfx = new SoundManager();
 const app = {
     canvas: null, ctx: null, 
     bgCanvas: null, bgCtx: null,
-    state: 'menu',
+    state: 'menu', prevState: 'menu',
     score: 0, hp: 4, combo: 0,
     activeMode: null,
     problems: [], particles: [], stars: [],
@@ -275,6 +397,7 @@ const app = {
     spawnDelay: 2000, 
     speedFactor: 1.0,
     hueOffset: 0,
+    vibrateEnabled: true,
 
     init() {
         this.canvas = document.getElementById('mainCanvas');
@@ -285,7 +408,24 @@ const app = {
         this.resize();
         this.initSpaceBg();
         window.addEventListener('resize', () => this.resize());
+        
+        const handleInteraction = () => {
+            sfx.init();
+            this.requestFullscreen();
+        };
+        document.addEventListener('pointerdown', handleInteraction, { once: false });
+        
         this.loop();
+    },
+
+    requestFullscreen() {
+        const doc = window.document;
+        const docEl = doc.documentElement;
+        const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile && requestFullScreen && !doc.fullscreenElement) {
+            requestFullScreen.call(docEl).catch(e => {});
+        }
     },
 
     resize() {
@@ -294,10 +434,38 @@ const app = {
         this.initSpaceBg();
     },
 
+    toggleSettings(show) {
+        if (show) {
+            this.prevState = this.state;
+            this.state = 'settings';
+            document.getElementById('menu-settings').classList.remove('hidden');
+        } else {
+            this.state = this.prevState;
+            document.getElementById('menu-settings').classList.add('hidden');
+        }
+    },
+
+    updateVolume() {
+        // ปรับสูตรคำนวณใหม่ ให้ Music ดังได้สูงสุดที่ 0.5 (จากเดิม 0.1) และ SFX ดังสุดที่ 1.0
+        const m = document.getElementById('vol-music').value / 200; 
+        const s = document.getElementById('vol-sfx').value / 100;
+        sfx.updateVolumes(m, s);
+    },
+
+    toggleVibrate() {
+        this.vibrateEnabled = !this.vibrateEnabled;
+        document.getElementById('vibrate-toggle').innerText = this.vibrateEnabled ? 'เปิด' : 'ปิด';
+    },
+
+    doVibrate(pattern) {
+        if (this.vibrateEnabled && navigator.vibrate) {
+            navigator.vibrate(pattern);
+        }
+    },
+
     initSpaceBg() {
         const chars = ['π', 'Σ', '∞', '√', '∫', 'x', 'y', 'z', 'f', 'λ', 'θ', 'Δ', '1', '0', '+', '-', '='];
         this.stars = [];
-        // หน้าเมนูจะมีสัญลักษณ์มากกว่าหน้าเล่นเพื่อความว้าว
         const count = this.state === 'menu' ? 60 : 25; 
         for(let i=0; i<count; i++) {
             this.stars.push({
@@ -305,7 +473,7 @@ const app = {
                 y: Math.random() * this.canvas.height - this.canvas.height/2,
                 z: Math.random() * this.canvas.width,
                 char: chars[Math.floor(Math.random() * chars.length)],
-                vx: (Math.random() - 0.5) * 0.5, // ความเร็วแนวราบสำหรับเมนู
+                vx: (Math.random() - 0.5) * 0.5,
                 vy: (Math.random() - 0.5) * 0.5
             });
         }
@@ -316,8 +484,16 @@ const app = {
         MODES.forEach(m => {
             const btn = document.createElement('button');
             btn.className = 'mode-btn';
-            btn.innerHTML = `<div style="font-size:1.6rem; margin-bottom:5px;">${m.emoji}</div><div style="font-weight:700; font-size:0.85rem;">${m.name}</div>`;
-            btn.onclick = () => { sfx.init(); this.start(m); };
+            btn.innerHTML = `
+                <div style="font-size:1.6rem;">${m.emoji}</div>
+                <div class="mode-name">${m.name}</div>
+                <div class="mode-desc">${m.desc}</div>
+            `;
+            btn.onclick = (e) => { 
+                e.stopPropagation();
+                sfx.init(); 
+                this.start(m); 
+            };
             container.appendChild(btn);
         });
     },
@@ -328,7 +504,7 @@ const app = {
         this.score = 0; this.hp = 4; this.combo = 0; this.speedFactor = 1.0;
         this.problems = []; this.particles = [];
         this.lastSpawn = Date.now();
-        this.initSpaceBg(); // รีเซ็ตพื้นหลังให้เข้าโหมดเล่น (สัญลักษณ์น้อยลง)
+        this.initSpaceBg();
         document.getElementById('menu-main').classList.add('hidden');
         document.getElementById('hud').classList.remove('hidden');
         document.getElementById('choice-container').classList.remove('hidden');
@@ -347,12 +523,21 @@ const app = {
         else if (op === '*') { a = rand(2, 12); b = rand(2, 10); ans = a * b; }
         else if (op === '/') { b = rand(2, 10); ans = rand(1, 10); a = ans * b; op = '÷'; }
 
+        let newX = 150 + Math.random() * (this.canvas.width - 300);
+        let attempts = 0;
+        while(attempts < 10) {
+            let conflict = this.problems.some(p => Math.abs(p.x - newX) < 130 && p.y < 200);
+            if (!conflict) break;
+            newX = 150 + Math.random() * (this.canvas.width - 300);
+            attempts++;
+        }
+
         const prob = {
             id: Date.now() + Math.random(),
             text: `${a} ${op === '*' ? '×' : op} ${b}`,
             ans: ans,
-            x: 150 + Math.random() * (this.canvas.width - 300),
-            y: -50,
+            x: newX,
+            y: -80,
             speed: (0.7 + (this.score / 900)) * m.speedMul * this.speedFactor,
             hide: m.hideProb,
             hideTimer: m.hideDelay || 0,
@@ -361,7 +546,7 @@ const app = {
 
         this.problems.push(prob);
         if (this.problems.length === 1) this.updateChoices();
-        this.spawnDelay = Math.max(900, 2400 / this.speedFactor);
+        this.spawnDelay = Math.max(800, 2400 / this.speedFactor);
     },
 
     updateChoices() {
@@ -384,14 +569,12 @@ const app = {
             this.score += 10 + (this.combo * 5);
             this.combo++;
             if (this.activeMode.ramp) this.speedFactor += 0.025;
-            
             if (this.combo > 0 && this.combo % 5 === 0) this.triggerComboAlert();
-
             this.explode(this.currentTarget.x, this.currentTarget.y, `hsl(${this.hueOffset}, 100%, 70%)`);
             this.problems.shift();
             this.updateChoices();
             sfx.playSuccess();
-            this.lastSpawn = Date.now() - 600;
+            this.lastSpawn = Date.now() - 500;
         } else {
             this.combo = 0;
             this.triggerPenalty();
@@ -402,7 +585,7 @@ const app = {
 
     triggerComboAlert() {
         sfx.playCombo();
-        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+        this.doVibrate([80, 40, 80]);
         const notification = document.getElementById('combo-notification');
         notification.classList.add('active');
         setTimeout(() => notification.classList.remove('active'), 1200);
@@ -410,7 +593,7 @@ const app = {
 
     triggerPenalty() {
         if (!this.activeMode.invul) this.hp--;
-        if (navigator.vibrate) navigator.vibrate([200]);
+        this.doVibrate([200]);
         if (this.hp <= 0) this.gameOver();
     },
 
@@ -428,16 +611,16 @@ const app = {
 
     gameOver() {
         this.state = 'over';
-        if (navigator.vibrate) navigator.vibrate([500]);
+        this.doVibrate([500]);
         document.getElementById('menu-result').classList.remove('hidden');
-        document.getElementById('result-stats').innerText = `🏆 คะแนน: ${this.score} | 🔥 คอมโบ: ${this.combo}`;
+        document.getElementById('result-stats').innerText = `🏆 คะแนน: ${this.score} | 🔥 คอมโบสูงสุด: ${this.combo}`;
     },
 
     explode(x, y, color) {
-        for(let i=0; i<12; i++) {
+        for(let i=0; i<15; i++) {
             this.particles.push({
-                x, y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
-                life: 1, size: Math.random()*3+1.5, color: color
+                x, y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
+                life: 1, size: Math.random()*4+2, color: color
             });
         }
     },
@@ -445,8 +628,7 @@ const app = {
     update() {
         this.hueOffset = (this.hueOffset + 1) % 360;
 
-        // พื้นหลัง: หน้าเมนูจะลอยเอื่อยๆ หน้าเล่นจะพุ่ง
-        if (this.state === 'menu') {
+        if (this.state === 'menu' || this.state === 'settings') {
             this.stars.forEach(s => {
                 s.x += s.vx; s.y += s.vy;
                 if (s.x > this.canvas.width/2) s.x = -this.canvas.width/2;
@@ -469,8 +651,7 @@ const app = {
         if (this.state !== 'play') return;
         
         let now = Date.now();
-        // เอาเงื่อนไข problems.length < 3 ออกเพื่อให้ไหลลงมาเรื่อยๆ ได้มากขึ้นตามความเร็ว
-        const maxActive = this.speedFactor > 1.5 ? 5 : 3;
+        const maxActive = this.speedFactor > 1.8 ? 5 : 3;
         if (now - this.lastSpawn > this.spawnDelay && this.problems.length < maxActive) {
             this.spawnProblem();
             this.lastSpawn = now;
@@ -479,7 +660,7 @@ const app = {
         this.problems.forEach((p, i) => {
             p.y += p.speed;
             if (p.hideTimer > 0) p.hideTimer--;
-            if (p.y > this.canvas.height - 90) {
+            if (p.y > this.canvas.height - 110) {
                 this.problems.splice(i, 1);
                 this.combo = 0;
                 this.triggerPenalty();
@@ -490,7 +671,7 @@ const app = {
         });
 
         this.particles.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.life -= 0.04;
+            p.x += p.vx; p.y += p.vy; p.life -= 0.035;
             if(p.life <= 0) this.particles.splice(i, 1);
         });
     },
@@ -502,24 +683,21 @@ const app = {
         const cx = this.bgCanvas.width / 2;
         const cy = this.bgCanvas.height / 2;
         
-        if (this.state === 'menu') {
-            // หน้าเมนู: ลอยแบบชิลล์ๆ
+        if (this.state === 'menu' || this.state === 'settings') {
             this.stars.forEach(s => {
                 const sx = s.x + cx;
                 const sy = s.y + cy;
-                this.bgCtx.globalAlpha = 0.4;
+                this.bgCtx.globalAlpha = 0.35;
                 this.bgCtx.fillStyle = `hsl(${(this.hueOffset + s.z/2)%360}, 60%, 70%)`;
                 this.bgCtx.font = `20px Mitr`;
                 this.bgCtx.fillText(s.char, sx, sy);
             });
         } else {
-            // หน้าเล่น: พุ่งแบบประหยัดเอฟเฟกต์
             this.stars.forEach(s => {
                 const sx = (s.x / s.z) * cx + cx;
                 const sy = (s.y / s.z) * cy + cy;
-                const size = (1 - s.z / this.bgCanvas.width) * 10;
-                const alpha = (1 - s.z / this.bgCanvas.width) * 0.4;
-
+                const size = (1 - s.z / this.bgCanvas.width) * 12;
+                const alpha = (1 - s.z / this.bgCanvas.width) * 0.5;
                 this.bgCtx.globalAlpha = alpha;
                 this.bgCtx.fillStyle = `hsl(${(this.hueOffset + s.z)%360}, 40%, 60%)`;
                 this.bgCtx.font = `bold ${size + 6}px Mitr`;
@@ -531,17 +709,14 @@ const app = {
         
         this.problems.forEach(p => {
             const isTarget = this.currentTarget && p.id === this.currentTarget.id;
-            
             this.ctx.font = `bold ${isTarget ? '38' : '28'}px 'Mitr'`;
             this.ctx.textAlign = 'center';
             let txt = (p.hide && p.hideTimer <= 0) ? '???' : p.text;
-            
-            const gradient = this.ctx.createLinearGradient(p.x - 35, p.y, p.x + 35, p.y);
+            const gradient = this.ctx.createLinearGradient(p.x - 40, p.y, p.x + 40, p.y);
             gradient.addColorStop(0, `hsl(${this.hueOffset + p.seed}, 100%, 70%)`);
             gradient.addColorStop(1, `hsl(${this.hueOffset + p.seed + 60}, 100%, 70%)`);
-            
             this.ctx.fillStyle = gradient;
-            this.ctx.shadowBlur = isTarget ? 12 : 0;
+            this.ctx.shadowBlur = isTarget ? 15 : 0;
             this.ctx.shadowColor = `hsl(${this.hueOffset + p.seed}, 100%, 50%)`;
             this.ctx.fillText(txt, p.x, p.y);
             this.ctx.shadowBlur = 0;
@@ -549,28 +724,23 @@ const app = {
             if (isTarget) {
                 const time = Date.now() * 0.003;
                 this.ctx.save();
-                this.ctx.translate(p.x, p.y - 10);
+                this.ctx.translate(p.x, p.y - 12);
                 this.ctx.rotate(time);
-                
-                // วงกลมนีออนขนาดพอดีโจทย์
                 this.ctx.shadowBlur = 12;
                 this.ctx.shadowColor = varColor('--neon-pink');
                 this.ctx.strokeStyle = varColor('--neon-pink');
                 this.ctx.lineWidth = 3;
-                this.ctx.setLineDash([10, 6]);
-                
+                this.ctx.setLineDash([12, 6]);
                 this.ctx.beginPath();
-                this.ctx.arc(0, 0, 52, 0, Math.PI * 2);
+                this.ctx.arc(0, 0, 55, 0, Math.PI * 2);
                 this.ctx.stroke();
-                
                 this.ctx.rotate(-time * 1.5);
                 this.ctx.strokeStyle = varColor('--neon-blue');
                 this.ctx.lineWidth = 1.5;
                 this.ctx.setLineDash([3, 3]);
                 this.ctx.beginPath();
-                this.ctx.arc(0, 0, 45, 0, Math.PI * 2);
+                this.ctx.arc(0, 0, 48, 0, Math.PI * 2);
                 this.ctx.stroke();
-                
                 this.ctx.restore();
             }
         });
@@ -598,5 +768,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
