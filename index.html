@@ -434,7 +434,7 @@ const app = {
     bgCanvas: null, bgCtx: null,
     state: 'menu', prevState: 'menu',
     score: 0, hp: 4, combo: 0,
-    lastFrameTime: 0, 
+    lastFrameTime: 0,
     activeMode: null,
     problems: [], particles: [], stars: [],
     choices: [], currentTarget: null,
@@ -448,8 +448,6 @@ const app = {
     init() {
         this.canvas = document.getElementById('mainCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.ctx.imageSmoothingEnabled = false;
-        this.bgCtx.imageSmoothingEnabled = false;
         this.bgCanvas = document.getElementById('mathBgCanvas');
         this.bgCtx = this.bgCanvas.getContext('2d');
         this.renderMenu();
@@ -656,7 +654,7 @@ const app = {
             this.score += 10 + (this.combo * 5);
             this.combo++;
             if (this.activeMode.ramp) {
-            this.speedFactor = Math.min(this.speedFactor + 0.02, 2.2);
+    this.speedFactor = Math.min(this.speedFactor + 0.02, 2.2);
 }
 
             if (this.combo > 0 && this.combo % 5 === 0) this.triggerComboAlert();
@@ -752,7 +750,8 @@ if (this.exitBtn) {
         if (this.state !== 'play') return;
         
         let now = Date.now();
-        const maxActive = this.speedFactor > 1.8 ? 5 : 3;
+        const maxActive = 3; // fix ตายตัว
+
         if (now - this.lastSpawn > this.spawnDelay && this.problems.length < maxActive) {
             this.spawnProblem();
             this.lastSpawn = now;
@@ -775,8 +774,13 @@ if (this.exitBtn) {
             p.x += p.vx; p.y += p.vy; p.life -= 0.035;
             if(p.life <= 0) this.particles.splice(i, 1);
         });
+
+        // safety guard
+if (this.problems.length > 6) {
+    this.problems.splice(3);
+}
+
     },
-    
 
     draw() {
         this.bgCtx.fillStyle = '#010106';
