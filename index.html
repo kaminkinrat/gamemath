@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Math Multiverse: Neon Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -25,6 +27,8 @@
             color: white;
             overflow: hidden;
             width: 100vw; height: 100dvh;
+            /* ป้องกันการลากเพื่อรีเฟรชบน iPhone */
+            overscroll-behavior-y: contain;
         }
 
         #game-container {
@@ -238,7 +242,7 @@
         </div>
         <div class="hud-group">
             <button class="hud-item icon-btn" onclick="app.toggleSettings(true)" style="border-color: var(--neon-gold);">⚙️</button>
-            <button class="hud-item" style="background: var(--neon-pink); cursor:pointer; border-color: white;" onclick="location.reload()">HOME</button>
+            <button class="hud-item" style="background: var(--neon-pink); cursor:pointer; border-color: white;" onclick="app.goHome()">HOME</button>
         </div>
     </div>
 
@@ -259,7 +263,7 @@
                 <button class="hud-item icon-btn" onclick="app.toggleSettings(true)" style="background: transparent; border-color: var(--neon-gold); font-size: 1.2rem;">⚙️</button>
             </div>
             <div class="mode-grid" id="mode-grid-container"></div>
-            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">แตะตรงไหนก็ได้เพื่อเริ่มประสบการณ์เต็มหน้าจอ</p>
+            <p style="color: var(--neon-blue); font-weight: 600; font-size: 0.9rem;">ยินดีต้อนรับสู่จักรวาลตัวเลข</p>
         </div>
     </div>
 
@@ -292,7 +296,7 @@
         <div class="panel">
             <h1 class="title">GAME OVER</h1>
             <div id="result-stats" style="margin: 20px 0; font-size: 1.6rem; font-weight: 700; color: white;"></div>
-            <button class="choice-btn" style="width: 100%;" onclick="location.reload()">เล่นใหม่</button>
+            <button class="choice-btn" style="width: 100%;" onclick="app.goHome()">เล่นใหม่</button>
         </div>
     </div>
 </div>
@@ -305,9 +309,9 @@ const MODES = [
     { id: 'hyper', name: 'ความเร็วแสง', emoji: '⚡', desc: 'เร็วขึ้นตามคะแนน', range: 20, ops: ['+', '-'], speedMul: 1.25, ramp: true },
     { id: 'multi', name: 'เซียนคูณ', emoji: '⚔️', desc: 'สูตรคูณแม่ 2-12', range: 12, ops: ['*'], speedMul: 0.9 },
     { id: 'div', name: 'หารสายฟ้า', emoji: '⚡', desc: 'ฝึกการหารเลขลงตัว', range: 10, ops: ['/'], speedMul: 1.1 },
-    { id: 'sonic', name: 'โซนิค', emoji: '🚀', desc: 'ความเร็วสูงสุดสำหรับโปร', range: 25, ops: ['+', '-'], speedMul: 3 },
-    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', desc: 'โจทย์จะหายไปอย่างรวดเร็ว!', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 160 },
-    { id: 'titan', name: 'บอสใหญ่', emoji: '👺', desc: 'จัดเต็มทุกเครื่องหมาย', range: 60, ops: ['+', '-', '*', '/'], speedMul: 2 },
+    { id: 'sonic', name: 'โซนิค', emoji: '🚀', desc: 'ความเร็วสูงสุดสำหรับโปร', range: 25, ops: ['+', '-'], speedMul: 2.1 },
+    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', desc: 'โจทย์จะหายไปอย่างรวดเร็ว!', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 120 },
+    { id: 'titan', name: 'บอสใหญ่', emoji: '👺', desc: 'จัดเต็มทุกเครื่องหมาย', range: 60, ops: ['+', '-', '*', '/'], speedMul: 1.6 },
     { id: 'chill', name: 'ชิลๆ', emoji: '🎋', desc: 'บวกไปเรื่อยๆ อมตะ', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
 ];
 
@@ -396,6 +400,7 @@ const app = {
     speedFactor: 1.0,
     hueOffset: 0,
     vibrateEnabled: true,
+    isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
 
     init() {
         this.canvas = document.getElementById('mainCanvas');
@@ -407,20 +412,28 @@ const app = {
         this.initSpaceBg();
         window.addEventListener('resize', () => this.resize());
         
-        // เพิ่ม Event สำหรับการแตะหรือคลิกเพื่อกระตุ้น Fullscreen ใน iPad/Tablet
+        // สำหรับ iPhone: การแตะเพื่อซ่อน Address Bar
         const triggerFullscreen = () => {
             sfx.init();
-            this.requestFullscreen();
+            this.handleFullscreen();
         };
 
-        // ใช้ Event pointerdown ซึ่งครอบคลุมทั้ง Mouse และ Touch
         document.addEventListener('pointerdown', triggerFullscreen, { once: false });
         
         this.loop();
     },
 
-    requestFullscreen() {
-        // ตรวจสอบว่าอยู่ใน Fullscreen หรือยัง ถ้ายังให้ขอสิทธิ์
+    handleFullscreen() {
+        // กรณี iPhone (Safari) - ใช้ Scroll เทคนิคแทน Fullscreen API
+        if (this.isIOS) {
+            window.scrollTo(0, 0);
+            // พยายามทำให้หน้าจอสูงขึ้นเพื่อซ่อน URL bar
+            if (document.documentElement.scrollHeight < window.innerHeight + 100) {
+                // เทคนิคซ่อน UI บน iPhone มักจะทำงานเมื่อหน้าจอมีการ scroll เล็กน้อย
+            }
+        }
+
+        // กรณีอุปกรณ์อื่นๆ (Android, iPadOS, Desktop)
         if (!document.fullscreenElement && 
             !document.webkitFullscreenElement && 
             !document.mozFullScreenElement && 
@@ -433,9 +446,7 @@ const app = {
                           el.msRequestFullscreen;
             
             if (request) {
-                request.call(el).catch(err => {
-                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
+                request.call(el).catch(() => {});
             }
         }
     },
@@ -492,6 +503,7 @@ const app = {
 
     renderMenu() {
         const container = document.getElementById('mode-grid-container');
+        container.innerHTML = ''; // Clear old items
         MODES.forEach(m => {
             const btn = document.createElement('button');
             btn.className = 'mode-btn';
@@ -503,7 +515,7 @@ const app = {
             btn.onclick = (e) => { 
                 e.stopPropagation();
                 sfx.init(); 
-                this.requestFullscreen(); // บังคับขอ Fullscreen อีกครั้งเมื่อเลือกโหมด
+                this.handleFullscreen();
                 this.start(m); 
             };
             container.appendChild(btn);
@@ -518,14 +530,32 @@ const app = {
         this.lastSpawn = Date.now();
         this.initSpaceBg();
         document.getElementById('menu-main').classList.add('hidden');
+        document.getElementById('menu-result').classList.add('hidden');
         document.getElementById('hud').classList.remove('hidden');
         document.getElementById('choice-container').classList.remove('hidden');
         this.spawnProblem();
         this.updateHUD();
     },
 
+    goHome() {
+        // แก้ไข: เปลี่ยนจาก reload หน้าจอ เป็นการเคลียร์สถานะ เพื่อรักษา Fullscreen
+        this.state = 'menu';
+        this.problems = [];
+        this.particles = [];
+        this.score = 0;
+        this.combo = 0;
+        this.initSpaceBg();
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('choice-container').classList.add('hidden');
+        document.getElementById('menu-result').classList.add('hidden');
+        document.getElementById('menu-settings').classList.add('hidden');
+        document.getElementById('menu-main').classList.remove('hidden');
+        this.renderMenu();
+    },
+
     spawnProblem() {
         const m = this.activeMode;
+        if (!m) return;
         let a, b, op, ans;
         op = m.ops[Math.floor(Math.random() * m.ops.length)];
         const range = m.range + Math.floor(this.score / 100);
@@ -611,7 +641,7 @@ const app = {
 
     updateHUD() {
         document.getElementById('score-val').innerText = this.score;
-        document.getElementById('hp-val').innerText = this.activeMode.invul ? '∞' : '❤️'.repeat(this.hp);
+        document.getElementById('hp-val').innerText = (this.activeMode && this.activeMode.invul) ? '∞' : '❤️'.repeat(Math.max(0, this.hp));
         const comboHud = document.getElementById('combo-hud');
         if (this.combo >= 2) {
             comboHud.style.display = 'block';
@@ -780,7 +810,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
