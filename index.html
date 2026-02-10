@@ -214,6 +214,34 @@
             text-align: center; padding: 20px;
         }
         @media screen and (orientation: portrait) { #orientation-overlay { display: flex; } }
+
+
+
+
+
+
+
+
+        #mobile-exit-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 9999;
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: 2px solid var(--neon-pink);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 0 15px var(--neon-pink);
+    cursor: pointer;
+}
+
+#mobile-exit-btn:active {
+    transform: scale(0.95);
+}
+
     </style>
 </head>
 <body>
@@ -228,6 +256,9 @@
     <div id="combo-notification">
         <div class="rainbow-rect"></div>
         <div style="font-size: 4rem; font-weight: 900; color: white; text-shadow: 0 0 20px black;">COMBO!!</div>
+        <!-- Mobile Exit Fullscreen Button -->
+<button id="mobile-exit-btn" class="hidden">⤫ ออกเต็มจอ</button>
+
     </div>
 
     <canvas id="mathBgCanvas"></canvas>
@@ -310,7 +341,7 @@ const MODES = [
     { id: 'multi', name: 'เซียนคูณ', emoji: '⚔️', desc: 'สูตรคูณแม่ 2-12', range: 12, ops: ['*'], speedMul: 0.9 },
     { id: 'div', name: 'หารสายฟ้า', emoji: '⚡', desc: 'ฝึกการหารเลขลงตัว', range: 10, ops: ['/'], speedMul: 1.1 },
     { id: 'sonic', name: 'โซนิค', emoji: '🚀', desc: 'ความเร็วสูงสุดสำหรับโปร', range: 25, ops: ['+', '-'], speedMul: 3 },
-    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', desc: 'โจทย์จะหายไปอย่างรวดเร็ว!', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 140 },
+    { id: 'memory', name: 'จำโจทย์', emoji: '🧠', desc: 'โจทย์จะหายไปอย่างรวดเร็ว!', range: 15, ops: ['+', '-'], hideProb: true, speedMul: 0.95, hideDelay: 148 },
     { id: 'titan', name: 'บอสใหญ่', emoji: '👺', desc: 'จัดเต็มทุกเครื่องหมาย', range: 60, ops: ['+', '-', '*', '/'], speedMul: 1.6 },
     { id: 'chill', name: 'ชิลๆ', emoji: '🎋', desc: 'บวกไปเรื่อยๆ อมตะ', range: 30, ops: ['+'], speedMul: 0.5, invul: true }
 ];
@@ -334,6 +365,29 @@ class SoundManager {
             this.updateVolumes(this.musicVol, this.sfxVol);
             this.startAmbience();
         } 
+
+        // Mobile exit fullscreen button logic
+const exitBtn = document.getElementById('mobile-exit-btn');
+
+// แสดงปุ่มเฉพาะมือถือ
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (isMobile) {
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            exitBtn.classList.remove('hidden');
+        } else {
+            exitBtn.classList.add('hidden');
+        }
+    });
+
+    exitBtn.onclick = () => {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(()=>{});
+        }
+    };
+}
+
     }
     
     updateVolumes(m, s) {
@@ -810,4 +864,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
