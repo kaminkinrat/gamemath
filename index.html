@@ -27,7 +27,6 @@
             color: white;
             overflow: hidden;
             width: 100vw; height: 100dvh;
-            /* ป้องกันการลากเพื่อรีเฟรชบน iPhone */
             overscroll-behavior-y: contain;
         }
 
@@ -38,16 +37,23 @@
             overflow: hidden;
         }
 
-        canvas { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: block; 
+            position: absolute; 
+            inset: 0;
+            image-rendering: auto;
+        }
 
-        /* Combo Notification */
+        /* Combo Notification - ลดความซับซ้อน */
         #combo-notification {
             position: absolute;
             inset: 0;
             pointer-events: none;
             z-index: 1800;
             opacity: 0;
-            transition: opacity 0.2s ease-out;
+            transition: opacity 0.15s ease-out;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -55,30 +61,13 @@
 
         #combo-notification.active {
             opacity: 1;
-            animation: screen-shake 0.1s infinite;
-        }
-
-        @keyframes screen-shake {
-            0% { transform: translate(2px, 2px); }
-            50% { transform: translate(-2px, -2px); }
-            100% { transform: translate(1px, -1px); }
         }
 
         .rainbow-rect {
             position: absolute;
             inset: 0px;
-            border: 10px solid transparent;
-            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff) border-box;
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            animation: rainbow-rotate 1.5s linear infinite;
-        }
-
-        @keyframes rainbow-rotate {
-            0% { filter: hue-rotate(0deg) brightness(1.1); }
-            100% { filter: hue-rotate(360deg) brightness(1.3); }
+            border: 8px solid var(--neon-pink);
+            border-radius: 4px;
         }
 
         .overlay {
@@ -109,15 +98,9 @@
             background-size: 400%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: text-rainbow 8s linear infinite;
+            background-clip: text;
             margin-bottom: 20px;
             font-weight: 700;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-
-        @keyframes text-rainbow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
         }
 
         .mode-grid {
@@ -141,7 +124,11 @@
             justify-content: center;
             min-height: 110px;
         }
-        .mode-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--neon-blue); transform: translateY(-3px); }
+        .mode-btn:hover { 
+            background: rgba(0, 242, 255, 0.15); 
+            border-color: var(--neon-blue); 
+            transform: translateY(-3px); 
+        }
 
         .mode-name { font-weight: 700; font-size: 0.95rem; margin-top: 5px; color: #fff; }
         .mode-desc { font-size: 0.65rem; color: var(--neon-blue); opacity: 0.9; margin-top: 4px; line-height: 1.2; }
@@ -168,25 +155,47 @@
             width: 40px; height: 40px; padding: 0; justify-content: center; cursor: pointer;
         }
 
+        /* ปรับปุ่มให้มีขนาดคงที่ - FIX DPI ISSUE */
         #choice-container {
-            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-            width: 95%; max-width: 650px; z-index: 1500;
+            position: absolute; 
+            bottom: 15px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px;
+            width: 95%; 
+            max-width: 650px; 
+            z-index: 1500;
         }
 
         .choice-btn {
             background: rgba(0,0,0,0.5);
             border: 2px solid var(--neon-blue);
             color: white;
-            padding: 12px 0;
+            padding: 0;
             border-radius: 15px;
-            font-size: 1.8rem;
             font-weight: 700;
             text-shadow: 0 0 8px var(--neon-blue);
             box-shadow: 0 4px 0 rgba(0, 242, 255, 0.4);
             transition: all 0.1s;
+            
+            /* FIX: กำหนดขนาดตายตัวด้วย min-height */
+            min-height: 60px;
+            height: 60px;
+            font-size: 1.6rem;
+            
+            /* ป้องกันการ scale ผิดเพี้ยน */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .choice-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--neon-blue); background: var(--neon-pink); }
+        
+        .choice-btn:active { 
+            transform: translateY(3px); 
+            box-shadow: 0 1px 0 var(--neon-blue); 
+            background: var(--neon-pink); 
+        }
 
         /* Settings UI */
         .settings-row {
@@ -215,34 +224,27 @@
         }
         @media screen and (orientation: portrait) { #orientation-overlay { display: flex; } }
 
+        html, body {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
 
-
-
-html, body {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-}
-
-
-
-#mobile-exit-btn {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    z-index: 99999;
-    padding: 10px 18px;
-    border-radius: 25px;
-    border: 2px solid var(--neon-pink);
-    background: rgba(0,0,0,0.8);
-    color: white;
-    font-weight: 700;
-    font-size: 0.9rem;
-    box-shadow: 0 0 20px var(--neon-pink);
-    display: none;
-}
-
-
+        #mobile-exit-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 99999;
+            padding: 10px 18px;
+            border-radius: 25px;
+            border: 2px solid var(--neon-pink);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px var(--neon-pink);
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -258,8 +260,6 @@ html, body {
         <div class="rainbow-rect"></div>
         <div style="font-size: 4rem; font-weight: 900; color: white; text-shadow: 0 0 20px black;">COMBO!!</div>
         <button id="mobile-exit-btn">⤫ ออกเต็มจอ</button>
-
-
     </div>
 
     <canvas id="mathBgCanvas"></canvas>
@@ -328,7 +328,7 @@ html, body {
         <div class="panel">
             <h1 class="title">GAME OVER</h1>
             <div id="result-stats" style="margin: 20px 0; font-size: 1.6rem; font-weight: 700; color: white;"></div>
-            <button class="choice-btn" style="width: 100%;" onclick="app.goHome()">เล่นใหม่</button>
+            <button class="choice-btn" style="width: 100%; min-height: 60px;" onclick="app.goHome()">เล่นใหม่</button>
         </div>
     </div>
 </div>
@@ -368,14 +368,11 @@ class SoundManager {
         }
 
         this.exitBtn = document.getElementById('mobile-exit-btn');
-
-this.exitBtn.onclick = () => {
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(()=>{});
-    }
-};
-
-
+        this.exitBtn.onclick = () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(()=>{});
+            }
+        };
     }
     
     updateVolumes(m, s) {
@@ -444,39 +441,36 @@ const app = {
     hueOffset: 0,
     vibrateEnabled: true,
     isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+    
+    // PERFORMANCE: ลด resolution ของ Canvas
+    pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
 
     init() {
         this.canvas = document.getElementById('mainCanvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { alpha: true });
         this.bgCanvas = document.getElementById('mathBgCanvas');
-        this.bgCtx = this.bgCanvas.getContext('2d');
+        this.bgCtx = this.bgCanvas.getContext('2d', { alpha: false });
+        
         this.renderMenu();
         this.resize();
         this.initSpaceBg();
         window.addEventListener('resize', () => this.resize());
         
-        // สำหรับ iPhone: การแตะเพื่อซ่อน Address Bar
-    const triggerFullscreen = () => {
-        sfx.init();
-        this.handleFullscreen();
-        document.removeEventListener('pointerdown', triggerFullscreen);
-    };
+        const triggerFullscreen = () => {
+            sfx.init();
+            this.handleFullscreen();
+            document.removeEventListener('pointerdown', triggerFullscreen);
+        };
 
-    document.addEventListener('pointerdown', triggerFullscreen);
+        document.addEventListener('pointerdown', triggerFullscreen);
         this.loop();
     },
 
     handleFullscreen() {
-        // กรณี iPhone (Safari) - ใช้ Scroll เทคนิคแทน Fullscreen API
         if (this.isIOS) {
             window.scrollTo(0, 0);
-            // พยายามทำให้หน้าจอสูงขึ้นเพื่อซ่อน URL bar
-            if (document.documentElement.scrollHeight < window.innerHeight + 100) {
-                // เทคนิคซ่อน UI บน iPhone มักจะทำงานเมื่อหน้าจอมีการ scroll เล็กน้อย
-            }
         }
 
-        // กรณีอุปกรณ์อื่นๆ (Android, iPadOS, Desktop)
         if (!document.fullscreenElement && 
             !document.webkitFullscreenElement && 
             !document.mozFullScreenElement && 
@@ -495,8 +489,18 @@ const app = {
     },
 
     resize() {
-        this.canvas.width = this.bgCanvas.width = window.innerWidth;
-        this.canvas.height = this.bgCanvas.height = window.innerHeight;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        
+        // PERFORMANCE: ใช้ pixelRatio ที่จำกัดไว้
+        this.canvas.width = w * this.pixelRatio;
+        this.canvas.height = h * this.pixelRatio;
+        this.bgCanvas.width = w * this.pixelRatio;
+        this.bgCanvas.height = h * this.pixelRatio;
+        
+        this.ctx.scale(this.pixelRatio, this.pixelRatio);
+        this.bgCtx.scale(this.pixelRatio, this.pixelRatio);
+        
         this.initSpaceBg();
     },
 
@@ -531,12 +535,17 @@ const app = {
     initSpaceBg() {
         const chars = ['π', 'Σ', '∞', '√', '∫', 'x', 'y', 'z', 'f', 'λ', 'θ', 'Δ', '1', '0', '+', '-', '='];
         this.stars = [];
-        const count = this.state === 'menu' ? 60 : 25; 
+        
+        // PERFORMANCE: ลดจำนวนดาวลง
+        const count = this.state === 'menu' ? 40 : 18; 
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        
         for(let i=0; i<count; i++) {
             this.stars.push({
-                x: Math.random() * this.canvas.width - this.canvas.width/2,
-                y: Math.random() * this.canvas.height - this.canvas.height/2,
-                z: Math.random() * this.canvas.width,
+                x: Math.random() * w - w/2,
+                y: Math.random() * h - h/2,
+                z: Math.random() * w,
                 char: chars[Math.floor(Math.random() * chars.length)],
                 vx: (Math.random() - 0.5) * 0.5,
                 vy: (Math.random() - 0.5) * 0.5
@@ -546,7 +555,7 @@ const app = {
 
     renderMenu() {
         const container = document.getElementById('mode-grid-container');
-        container.innerHTML = ''; // Clear old items
+        container.innerHTML = '';
         MODES.forEach(m => {
             const btn = document.createElement('button');
             btn.className = 'mode-btn';
@@ -581,7 +590,6 @@ const app = {
     },
 
     goHome() {
-        // แก้ไข: เปลี่ยนจาก reload หน้าจอ เป็นการเคลียร์สถานะ เพื่อรักษา Fullscreen
         this.state = 'menu';
         this.problems = [];
         this.particles = [];
@@ -608,12 +616,13 @@ const app = {
         else if (op === '*') { a = rand(2, 12); b = rand(2, 10); ans = a * b; }
         else if (op === '/') { b = rand(2, 10); ans = rand(1, 10); a = ans * b; op = '÷'; }
 
-        let newX = 150 + Math.random() * (this.canvas.width - 300);
+        const w = window.innerWidth;
+        let newX = 150 + Math.random() * (w - 300);
         let attempts = 0;
         while(attempts < 10) {
             let conflict = this.problems.some(p => Math.abs(p.x - newX) < 130 && p.y < 200);
             if (!conflict) break;
-            newX = 150 + Math.random() * (this.canvas.width - 300);
+            newX = 150 + Math.random() * (w - 300);
             attempts++;
         }
 
@@ -654,8 +663,8 @@ const app = {
             this.score += 10 + (this.combo * 5);
             this.combo++;
             if (this.activeMode.ramp) {
-    this.speedFactor = Math.min(this.speedFactor + 0.02, 2.2);
-}
+                this.speedFactor = Math.min(this.speedFactor + 0.02, 2.2);
+            }
 
             if (this.combo > 0 && this.combo % 5 === 0) this.triggerComboAlert();
             this.explode(this.currentTarget.x, this.currentTarget.y, `hsl(${this.hueOffset}, 100%, 70%)`);
@@ -676,7 +685,7 @@ const app = {
         this.doVibrate([80, 40, 80]);
         const notification = document.getElementById('combo-notification');
         notification.classList.add('active');
-        setTimeout(() => notification.classList.remove('active'), 1200);
+        setTimeout(() => notification.classList.remove('active'), 1000);
     },
 
     triggerPenalty() {
@@ -700,49 +709,56 @@ const app = {
     gameOver() {
         this.state = 'over';
         this.doVibrate([500]);
+        
+        // PERFORMANCE: เคลียร์ objects ทิ้ง
+        this.problems = [];
+        this.particles = [];
+        
         document.getElementById('menu-result').classList.remove('hidden');
         document.getElementById('result-stats').innerText = `🏆 คะแนน: ${this.score} | 🔥 คอมโบสูงสุด: ${this.combo}`;
     },
 
     explode(x, y, color) {
-        for(let i=0; i<8; i++) {
+        // PERFORMANCE: ลดจำนวน particles
+        for(let i=0; i<6; i++) {
             this.particles.push({
-                x, y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
-                life: 1, size: Math.random()*4+2, color: color
+                x, y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                life: 1, size: Math.random()*3+2, color: color
             });
         }
     },
 
     update() {
         this.hueOffset = (this.hueOffset + 1) % 360;
-        // ===== เช็คแสดงปุ่มออก fullscreen =====
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (sfx.exitBtn) {
+            if (isMobile && document.fullscreenElement) {
+                sfx.exitBtn.style.display = 'block';
+            } else {
+                sfx.exitBtn.style.display = 'none';
+            }
+        }
 
-if (this.exitBtn) {
-    if (isMobile && document.fullscreenElement) {
-        this.exitBtn.style.display = 'block';
-    } else {
-        this.exitBtn.style.display = 'none';
-    }
-}
-// =========================================
+        const w = window.innerWidth;
+        const h = window.innerHeight;
 
         if (this.state === 'menu' || this.state === 'settings') {
             this.stars.forEach(s => {
                 s.x += s.vx; s.y += s.vy;
-                if (s.x > this.canvas.width/2) s.x = -this.canvas.width/2;
-                if (s.x < -this.canvas.width/2) s.x = this.canvas.width/2;
-                if (s.y > this.canvas.height/2) s.y = -this.canvas.height/2;
-                if (s.y < -this.canvas.height/2) s.y = this.canvas.height/2;
+                if (s.x > w/2) s.x = -w/2;
+                if (s.x < -w/2) s.x = w/2;
+                if (s.y > h/2) s.y = -h/2;
+                if (s.y < -h/2) s.y = h/2;
             });
         } else {
             const warpSpeed = 2 + (this.score/500);
             this.stars.forEach(s => {
                 s.z -= warpSpeed;
                 if (s.z <= 0) {
-                    s.z = this.canvas.width;
-                    s.x = Math.random() * this.canvas.width - this.canvas.width/2;
-                    s.y = Math.random() * this.canvas.height - this.canvas.height/2;
+                    s.z = w;
+                    s.x = Math.random() * w - w/2;
+                    s.y = Math.random() * h - h/2;
                 }
             });
         }
@@ -750,7 +766,7 @@ if (this.exitBtn) {
         if (this.state !== 'play') return;
         
         let now = Date.now();
-        const maxActive = 3; // fix ตายตัว
+        const maxActive = 3;
 
         if (now - this.lastSpawn > this.spawnDelay && this.problems.length < maxActive) {
             this.spawnProblem();
@@ -760,7 +776,7 @@ if (this.exitBtn) {
         this.problems.forEach((p, i) => {
             p.y += p.speed;
             if (p.hideTimer > 0) p.hideTimer--;
-            if (p.y > this.canvas.height - 110) {
+            if (p.y > h - 110) {
                 this.problems.splice(i, 1);
                 this.combo = 0;
                 this.triggerPenalty();
@@ -770,24 +786,27 @@ if (this.exitBtn) {
             }
         });
 
+        // PERFORMANCE: ลดอายุ particles เร็วขึ้น
         this.particles.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.life -= 0.035;
+            p.x += p.vx; p.y += p.vy; p.life -= 0.04;
             if(p.life <= 0) this.particles.splice(i, 1);
         });
 
-        // safety guard
-if (this.problems.length > 6) {
-    this.problems.splice(3);
-}
-
+        if (this.problems.length > 6) {
+            this.problems.splice(3);
+        }
     },
 
     draw() {
-        this.bgCtx.fillStyle = '#010106';
-        this.bgCtx.fillRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
+        const w = window.innerWidth;
+        const h = window.innerHeight;
         
-        const cx = this.bgCanvas.width / 2;
-        const cy = this.bgCanvas.height / 2;
+        // PERFORMANCE: วาดพื้นหลังแค่ครั้งเดียว แทนที่จะวาดทุกเฟรม
+        this.bgCtx.fillStyle = '#010106';
+        this.bgCtx.fillRect(0, 0, w, h);
+        
+        const cx = w / 2;
+        const cy = h / 2;
         
         if (this.state === 'menu' || this.state === 'settings') {
             this.stars.forEach(s => {
@@ -802,8 +821,8 @@ if (this.problems.length > 6) {
             this.stars.forEach(s => {
                 const sx = (s.x / s.z) * cx + cx;
                 const sy = (s.y / s.z) * cy + cy;
-                const size = (1 - s.z / this.bgCanvas.width) * 12;
-                const alpha = (1 - s.z / this.bgCanvas.width) * 0.5;
+                const size = (1 - s.z / w) * 12;
+                const alpha = (1 - s.z / w) * 0.5;
                 this.bgCtx.globalAlpha = alpha;
                 this.bgCtx.fillStyle = `hsl(${(this.hueOffset + s.z)%360}, 40%, 60%)`;
                 this.bgCtx.font = `bold ${size + 6}px Mitr`;
@@ -811,17 +830,16 @@ if (this.problems.length > 6) {
             });
         }
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, w, h);
         
         this.problems.forEach(p => {
             const isTarget = this.currentTarget && p.id === this.currentTarget.id;
             this.ctx.font = `bold ${isTarget ? '38' : '28'}px 'Mitr'`;
             this.ctx.textAlign = 'center';
             let txt = (p.hide && p.hideTimer <= 0) ? '???' : p.text;
-            const gradient = this.ctx.createLinearGradient(p.x - 40, p.y, p.x + 40, p.y);
-            gradient.addColorStop(0, `hsl(${this.hueOffset + p.seed}, 100%, 70%)`);
-            gradient.addColorStop(1, `hsl(${this.hueOffset + p.seed + 60}, 100%, 70%)`);
-            this.ctx.fillStyle = gradient;
+            
+            // PERFORMANCE: ใช้สีง่ายๆ แทน gradient
+            this.ctx.fillStyle = `hsl(${this.hueOffset + p.seed}, 100%, 70%)`;
             this.ctx.shadowBlur = isTarget ? 6 : 0;
             this.ctx.shadowColor = `hsl(${this.hueOffset + p.seed}, 100%, 50%)`;
             this.ctx.fillText(txt, p.x, p.y);
@@ -833,19 +851,12 @@ if (this.problems.length > 6) {
                 this.ctx.translate(p.x, p.y - 12);
                 this.ctx.rotate(time);
                 this.ctx.shadowBlur = 12;
-                this.ctx.shadowColor = varColor('--neon-pink');
-                this.ctx.strokeStyle = varColor('--neon-pink');
+                this.ctx.shadowColor = '#ff00ea';
+                this.ctx.strokeStyle = '#ff00ea';
                 this.ctx.lineWidth = 3;
                 this.ctx.setLineDash([12, 6]);
                 this.ctx.beginPath();
                 this.ctx.arc(0, 0, 55, 0, Math.PI * 2);
-                this.ctx.stroke();
-                this.ctx.rotate(-time * 1.5);
-                this.ctx.strokeStyle = varColor('--neon-blue');
-                this.ctx.lineWidth = 1.5;
-                this.ctx.setLineDash([3, 3]);
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, 48, 0, Math.PI * 2);
                 this.ctx.stroke();
                 this.ctx.restore();
             }
@@ -861,45 +872,26 @@ if (this.problems.length > 6) {
         this.ctx.globalAlpha = 1;
     },
 
-loop(timestamp) {
-    if (!this.lastFrameTime) this.lastFrameTime = timestamp;
-    const delta = timestamp - this.lastFrameTime;
-    this.lastFrameTime = timestamp;
+    loop(timestamp) {
+        if (!this.lastFrameTime) this.lastFrameTime = timestamp;
+        const delta = timestamp - this.lastFrameTime;
+        this.lastFrameTime = timestamp;
 
-    if (delta < 40) { // ถ้า fps ยังโอเค
+        // PERFORMANCE: จำกัด FPS ไว้ที่ 60
+        if (delta < 16.67) {
+            requestAnimationFrame((t) => this.loop(t));
+            return;
+        }
+
         this.update();
         this.draw();
+
+        requestAnimationFrame((t) => this.loop(t));
     }
-
-    requestAnimationFrame((t) => this.loop(t));
-}
-
 };
 
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
-function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
